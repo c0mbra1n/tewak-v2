@@ -12,6 +12,7 @@ $stmt = $pdo->prepare("
     SELECT
         u.full_name,
         u.subject as default_subject,
+        u.photo,
         a.status,
         a.scan_time,
         a.subject as actual_subject,
@@ -39,6 +40,7 @@ foreach ($teachers_data as $teacher) {
 
     $data[] = [
         'name' => $teacher['full_name'],
+        'photo' => $teacher['photo'],
         'subject' => $display_subject,
         'status' => $teacher['status'] ?? 'belum_hadir',
         'time' => $teacher['scan_time'] ? date('H:i', strtotime($teacher['scan_time'])) : '-',

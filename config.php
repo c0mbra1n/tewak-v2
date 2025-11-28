@@ -25,7 +25,7 @@ function jsonResponse($status, $message, $data = null)
 }
 
 // Load Settings
-$SCHOOL_NAME = 'Mogu School';
+$SCHOOL_NAME = 'Tewak Apps';
 $SCHOOL_LOGO = null;
 $DEFAULT_START_TIME = '07:15:00';
 

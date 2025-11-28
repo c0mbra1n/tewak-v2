@@ -17,6 +17,47 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$user_id, $date]);
 $attendance_history = $stmt->fetchAll();
+// Handle Photo Upload
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['photo'])) {
+    if ($_FILES['photo']['error'] == 0) {
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        $filename = $_FILES['photo']['name'];
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        if (in_array($ext, $allowed)) {
+            $new_filename = 'teacher_' . $user_id . '_' . time() . '.' . $ext;
+            $upload_dir = 'assets/uploads/teachers/';
+
+            // Ensure directory exists
+            if (!is_dir($upload_dir)) {
+                if (!mkdir($upload_dir, 0777, true)) {
+                    echo "<script>alert('Gagal membuat direktori upload.');</script>";
+                    exit;
+                }
+            }
+
+            if (move_uploaded_file($_FILES['photo']['tmp_name'], $upload_dir . $new_filename)) {
+                // Update DB
+                $stmt = $pdo->prepare("UPDATE users SET photo = ? WHERE id = ?");
+                $stmt->execute([$new_filename, $user_id]);
+                // Update session
+                $_SESSION['photo'] = $new_filename;
+                echo "<script>alert('Foto berhasil diupload!'); window.location.href='teacher_dashboard.php';</script>";
+            } else {
+                echo "<script>alert('Gagal mengupload foto. Cek permission folder.');</script>";
+            }
+        } else {
+            echo "<script>alert('Format file tidak valid. Gunakan JPG, PNG, atau GIF.');</script>";
+        }
+    } else {
+        $error_code = $_FILES['photo']['error'];
+        echo "<script>alert('Error upload file. Code: $error_code');</script>";
+    }
+}
+
+// Get current photo
+$stmt = $pdo->prepare("SELECT photo FROM users WHERE id = ?");
+$stmt->execute([$user_id]);
+$user_photo = $stmt->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -24,7 +65,7 @@ $attendance_history = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Guru - Mogu</title>
+    <title>Dashboard Guru - Tewak Apps</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/themes.css">
@@ -41,7 +82,7 @@ $attendance_history = $stmt->fetchAll();
 
 <body class="theme-material">
     <nav class="navbar">
-        <a href="#" class="navbar-brand">Mogu Guru</a>
+        <a href="#" class="navbar-brand">Tewak Apps Guru</a>
         <ul class="navbar-nav">
             <li class="nav-item"><a href="#" class="nav-link">Dashboard</a></li>
             <li class="nav-item"><a href="monitor.php" class="nav-link" target="_blank">Monitoring</a></li>
@@ -52,6 +93,23 @@ $attendance_history = $stmt->fetchAll();
     <div class="container">
         <div class="card">
             <h3>Absensi Guru</h3>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <?php if ($user_photo): ?>
+                    <img src="assets/uploads/teachers/<?= htmlspecialchars($user_photo) ?>" alt="Foto Profil"
+                        style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-color);">
+                <?php else: ?>
+                    <div
+                        style="width: 100px; height: 100px; border-radius: 50%; background: #ccc; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 40px;">
+                        <?= strtoupper(substr($_SESSION['full_name'], 0, 1)) ?>
+                    </div>
+                <?php endif; ?>
+                <br>
+                <button class="btn btn-sm btn-secondary" onclick="document.getElementById('photoInput').click()"
+                    style="margin-top: 10px; font-size: 0.8rem;">Ubah Foto</button>
+                <form method="POST" enctype="multipart/form-data" style="display: none;">
+                    <input type="file" name="photo" id="photoInput" accept="image/*" onchange="this.form.submit()">
+                </form>
+            </div>
             <p>Halo, <strong><?= htmlspecialchars($_SESSION['full_name']) ?></strong></p>
 
             <?php

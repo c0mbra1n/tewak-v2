@@ -77,7 +77,7 @@ $days = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Jadwal - Mogu</title>
+    <title>Manajemen Jadwal - Tewak Apps</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/themes.css">
@@ -86,7 +86,7 @@ $days = [
 
 <body class="theme-material">
     <nav class="navbar">
-        <a href="#" class="navbar-brand">Mogu Admin</a>
+        <a href="#" class="navbar-brand">Tewak Apps Admin</a>
         <ul class="navbar-nav">
             <li class="nav-item"><a href="admin_dashboard.php" class="nav-link">Users</a></li>
             <li class="nav-item"><a href="classes.php" class="nav-link">Kelas</a></li>

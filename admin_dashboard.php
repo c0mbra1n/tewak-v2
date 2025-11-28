@@ -119,7 +119,11 @@ $classes = $stmt->fetchAll();
 
     <div class="container dashboard-container">
         <div class="card dashboard-left">
-            <h3>Tambah User Baru</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Tambah User Baru</h3>
+                <a href="import_teachers.php" class="btn btn-secondary"
+                    style="padding: 5px 10px; font-size: 0.9rem;">Import Guru</a>
+            </div>
             <?php if ($message): ?>
                 <div class="alert alert-info"><?= $message ?></div>
             <?php endif; ?>

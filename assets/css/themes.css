@@ -1,0 +1,80 @@
+/* Material Design (Default) */
+.theme-material {
+    --border-radius: 4px;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Flat Design */
+.theme-flat {
+    --primary-color: #2c3e50;
+    --primary-variant: #34495e;
+    --secondary-color: #1abc9c;
+    --shadow: none;
+    --border-radius: 0;
+}
+
+.theme-flat .card,
+.theme-flat .btn {
+    border: 1px solid #ddd;
+}
+
+/* Neumorphism */
+.theme-neumorphism {
+    --background-color: #e0e5ec;
+    --surface-color: #e0e5ec;
+    --shadow: 9px 9px 16px rgb(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
+    --border-radius: 20px;
+}
+
+.theme-neumorphism .card {
+    box-shadow: var(--shadow);
+    border: none;
+}
+
+.theme-neumorphism .form-control {
+    background: #e0e5ec;
+    box-shadow: inset 6px 6px 12px #b8b9be, inset -6px -6px 12px #ffffff;
+    border: none;
+}
+
+/* Glassmorphism */
+.theme-glassmorphism {
+    --background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --surface-color: rgba(255, 255, 255, 0.25);
+    --on-surface: #ffffff;
+    --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    --border-radius: 10px;
+}
+
+.theme-glassmorphism .card {
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.theme-glassmorphism body {
+    background: var(--background-color);
+    min-height: 100vh;
+}
+
+/* Claymorphism */
+.theme-claymorphism {
+    --background-color: #f0f4f8;
+    --surface-color: #ffffff;
+    --shadow: 8px 8px 16px 0 rgba(0, 0, 0, 0.1), inset -8px -8px 12px 0 rgba(0, 0, 0, 0.05), inset 8px 8px 12px 0 rgba(255, 255, 255, 1);
+    --border-radius: 32px;
+}
+
+.theme-claymorphism .card {
+    box-shadow: var(--shadow);
+    border-radius: var(--border-radius);
+}
+
+/* Dark Mode Overrides */
+body.dark-mode {
+    --background-color: #121212;
+    --surface-color: #1e1e1e;
+    --on-background: #ffffff;
+    --on-surface: #ffffff;
+    --primary-color: #bb86fc;
+    --primary-variant: #3700b3;
+}

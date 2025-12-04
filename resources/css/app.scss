@@ -1,0 +1,47 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap');
+
+// Variables
+$font-family-sans-serif: 'Outfit', sans-serif;
+$primary: #4361ee;
+$secondary: #3f37c9;
+$success: #4cc9f0;
+$info: #4895ef;
+$warning: #f72585;
+$danger: #f72585;
+$light: #f8f9fa;
+$dark: #212529;
+
+// Bootstrap
+@import 'bootstrap/scss/bootstrap';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+// Custom Styles
+body {
+    background-color: #f0f2f5;
+    font-family: $font-family-sans-serif;
+}
+
+.card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, $primary, $secondary);
+    border: none;
+
+    &:hover {
+        background: linear-gradient(45deg, darken($primary, 10%), darken($secondary, 10%));
+    }
+}
+
+.form-control {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+
+    &:focus {
+        box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+    }
+}

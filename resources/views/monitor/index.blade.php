@@ -105,7 +105,69 @@
             padding-right: 2rem;
         }
 
-        /* ... existing status colors ... */
+        /* Status Colors */
+        .status-hadir {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .status-telat {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .status-izin {
+            background-color: #06b6d4;
+            color: white;
+        }
+
+        .status-sakit {
+            background-color: #8b5cf6;
+            color: white;
+        }
+
+        .status-alpa {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .status-dinas {
+            background-color: #0ea5e9;
+            color: white;
+        }
+
+        .status-belum_hadir {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .status-belum_hadir_telat {
+            background-color: #dc2626;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .status-tidak_hadir {
+            background-color: #991b1b;
+            color: white;
+        }
+
+        .status-tidak_ada_jadwal {
+            background-color: #d1d5db;
+            color: #374151;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
 
         /* Dark Mode Global Styles */
         [data-theme="dark"] body {

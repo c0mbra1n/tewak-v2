@@ -156,27 +156,36 @@
 
         /* Dark Mode Global Styles */
         [data-theme="dark"] body {
-            background-color: #0f172a;
-            color: #e2e8f0;
+            background-color: #0f172a !important;
+            color: #e2e8f0 !important;
         }
 
-        [data-theme="dark"] .bg-light {
-            background-color: #1e293b !important;
-        }
-
+        [data-theme="dark"] .bg-light,
         [data-theme="dark"] .bg-white {
             background-color: #1e293b !important;
+            color: #e2e8f0 !important;
         }
 
         [data-theme="dark"] .card {
-            background-color: #1e293b;
-            border-color: #334155;
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #e2e8f0 !important;
         }
 
         [data-theme="dark"] .card-header {
-            background-color: #1e293b;
-            border-bottom-color: #334155;
-            color: #e2e8f0;
+            background-color: #1e293b !important;
+            border-bottom-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="dark"] .card-title,
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4,
+        [data-theme="dark"] h5,
+        [data-theme="dark"] h6 {
+            color: #f1f5f9 !important;
         }
 
         [data-theme="dark"] .text-muted {
@@ -184,49 +193,69 @@
         }
 
         [data-theme="dark"] .table {
-            color: #e2e8f0;
-            border-color: #334155;
+            color: #e2e8f0 !important;
+            border-color: #334155 !important;
         }
 
         [data-theme="dark"] .table-hover tbody tr:hover {
-            color: #e2e8f0;
-            background-color: #334155;
+            color: #e2e8f0 !important;
+            background-color: #334155 !important;
         }
 
         [data-theme="dark"] .table thead th {
-            color: #e2e8f0;
-            background-color: #0f172a;
-            border-bottom-color: #334155;
+            color: #e2e8f0 !important;
+            background-color: #0f172a !important;
+            border-bottom-color: #334155 !important;
         }
 
         [data-theme="dark"] .table td,
         [data-theme="dark"] .table th {
-            border-bottom-color: #334155;
+            border-bottom-color: #334155 !important;
+            color: #e2e8f0 !important;
         }
 
         [data-theme="dark"] .monitoring-header {
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5) !important;
         }
 
         [data-theme="dark"] .btn-outline-secondary {
-            color: #cbd5e1;
-            border-color: #475569;
+            color: #cbd5e1 !important;
+            border-color: #475569 !important;
         }
 
         [data-theme="dark"] .btn-outline-secondary:hover,
         [data-theme="dark"] .btn-outline-secondary.active {
-            background-color: #475569;
-            color: #fff;
+            background-color: #475569 !important;
+            color: #fff !important;
         }
 
         [data-theme="dark"] .form-select {
-            background-color: #1e293b;
-            border-color: #334155;
-            color: #e2e8f0;
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #e2e8f0 !important;
         }
 
         [data-theme="dark"] .border-top {
             border-top-color: #334155 !important;
+        }
+
+        [data-theme="dark"] .teacher-card {
+            background-color: #1e293b !important;
+            border: 1px solid #334155 !important;
+        }
+
+        [data-theme="dark"] .teacher-card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3) !important;
+            background-color: #26334d !important;
+        }
+
+        [data-theme="dark"] .schedule-info {
+            background-color: #0f172a !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .list-view-item:hover {
+            background-color: #1e293b !important;
         }
     </style>
 </head>

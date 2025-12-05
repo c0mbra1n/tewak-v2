@@ -12,147 +12,91 @@
         }
     </script>
     <style>
+        :root {
+            --header-height: 80px;
+            --footer-height: 50px;
+        }
+
+        body {
+            font-size: 1.1rem;
+            /* Base font size increase */
+            overflow-x: hidden;
+        }
+
         .monitoring-header {
             background: linear-gradient(135deg, #4361ee, #3f37c9);
             color: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2);
+            padding: 1rem 2rem;
+            /* Reduced padding */
+            border-radius: 0 0 1rem 1rem;
+            /* Rounded bottom only */
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .monitoring-header h1 {
+            font-size: 2.5rem;
+            /* Larger title */
+            margin-bottom: 0.5rem;
+        }
+
+        .monitoring-header p {
+            font-size: 1.2rem;
         }
 
         .teacher-card {
             transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
         }
 
-        .teacher-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        .teacher-card .card-title {
+            font-size: 1.4rem;
+            /* Larger teacher name */
+        }
+
+        .teacher-card .status-badge {
+            font-size: 1rem;
+            /* Larger badge */
+            padding: 0.5em 1em;
         }
 
         .avatar-circle {
-            width: 80px;
-            height: 80px;
-            background-color: #e9ecef;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: #6c757d;
-            margin: 0 auto 1rem;
+            width: 100px;
+            /* Larger avatar */
+            height: 100px;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
         }
 
-        .avatar-circle-sm {
-            width: 45px;
-            height: 45px;
-            font-size: 1rem;
-            margin: 0;
+        .table {
+            font-size: 1.2rem;
+            /* Larger table text */
+        }
+
+        .table th {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            vertical-align: middle;
+            padding: 1rem 0.75rem;
+            /* More breathing room in cells */
         }
 
         .status-badge {
-            font-size: 0.8rem;
-            padding: 0.4em 0.8em;
-            border-radius: 20px;
+            font-size: 1rem;
+            padding: 0.5em 1em;
         }
 
-        .status-hadir {
-            background-color: #10b981;
-            color: white;
+        /* Compact margins for public display */
+        .container-fluid {
+            padding-left: 2rem;
+            padding-right: 2rem;
         }
 
-        .status-telat {
-            background-color: #f59e0b;
-            color: white;
-        }
-
-        .status-izin {
-            background-color: #06b6d4;
-            color: white;
-        }
-
-        .status-sakit {
-            background-color: #8b5cf6;
-            color: white;
-        }
-
-        .status-alpa {
-            background-color: #ef4444;
-            color: white;
-        }
-
-        .status-dinas {
-            background-color: #0ea5e9;
-            color: white;
-        }
-
-        .status-belum_hadir {
-            background-color: #6b7280;
-            color: white;
-        }
-
-        .status-belum_hadir_telat {
-            background-color: #dc2626;
-            color: white;
-            animation: pulse 1s infinite;
-        }
-
-        .status-tidak_hadir {
-            background-color: #991b1b;
-            color: white;
-        }
-
-        .status-tidak_ada_jadwal {
-            background-color: #d1d5db;
-            color: #374151;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
-        }
-
-        .schedule-info {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 0.5rem;
-            margin-top: 0.5rem;
-            font-size: 0.75rem;
-        }
-
-        .view-toggle .btn {
-            padding: 0.4rem 0.8rem;
-        }
-
-        .view-toggle .btn.active {
-            background-color: #4361ee;
-            color: white;
-            border-color: #4361ee;
-        }
-
-        /* List View Styles */
-        .list-view-item {
-            transition: background-color 0.2s;
-        }
-
-        .list-view-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        [data-theme="dark"] .list-view-item:hover {
-            background-color: #1f2b47 !important;
-        }
-
-        [data-theme="dark"] .schedule-info {
-            background-color: #1a1a2e !important;
-        }
+        /* ... existing status colors ... */
 
         /* Dark Mode Global Styles */
         [data-theme="dark"] body {
@@ -263,8 +207,8 @@
 <body>
     @include('partials.loader')
     <div class="d-flex flex-column min-vh-100">
-        <div class="container py-4 flex-grow-1">
-            <div class="monitoring-header text-center position-relative">
+        <div class="container-fluid px-4 flex-grow-1">
+            <div class="monitoring-header text-center position-relative mx-n4 mt-n4 pt-4">
                 <h1 class="fw-bold mb-2">Monitoring Keberadaan Guru</h1>
                 <p class="mb-0">
                     <span id="current-time">Loading time...</span>
@@ -389,8 +333,8 @@
             </div>
         </div>
 
-        <footer class="text-center py-4 mt-auto border-top">
-            <small class="text-muted">
+        <footer class="text-center py-2 mt-auto border-top">
+            <small class="text-muted" style="font-size: 0.9rem;">
                 Copyright &copy; {{ date('Y') }} Developed by <strong>c0mbra1n</strong> in Banten 🇮🇩
             </small>
         </footer>

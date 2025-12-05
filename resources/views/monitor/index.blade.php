@@ -153,6 +153,81 @@
         [data-theme="dark"] .schedule-info {
             background-color: #1a1a2e !important;
         }
+
+        /* Dark Mode Global Styles */
+        [data-theme="dark"] body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+
+        [data-theme="dark"] .bg-light {
+            background-color: #1e293b !important;
+        }
+
+        [data-theme="dark"] .bg-white {
+            background-color: #1e293b !important;
+        }
+
+        [data-theme="dark"] .card {
+            background-color: #1e293b;
+            border-color: #334155;
+        }
+
+        [data-theme="dark"] .card-header {
+            background-color: #1e293b;
+            border-bottom-color: #334155;
+            color: #e2e8f0;
+        }
+
+        [data-theme="dark"] .text-muted {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .table {
+            color: #e2e8f0;
+            border-color: #334155;
+        }
+
+        [data-theme="dark"] .table-hover tbody tr:hover {
+            color: #e2e8f0;
+            background-color: #334155;
+        }
+
+        [data-theme="dark"] .table thead th {
+            color: #e2e8f0;
+            background-color: #0f172a;
+            border-bottom-color: #334155;
+        }
+
+        [data-theme="dark"] .table td,
+        [data-theme="dark"] .table th {
+            border-bottom-color: #334155;
+        }
+
+        [data-theme="dark"] .monitoring-header {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .btn-outline-secondary {
+            color: #cbd5e1;
+            border-color: #475569;
+        }
+
+        [data-theme="dark"] .btn-outline-secondary:hover,
+        [data-theme="dark"] .btn-outline-secondary.active {
+            background-color: #475569;
+            color: #fff;
+        }
+
+        [data-theme="dark"] .form-select {
+            background-color: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        [data-theme="dark"] .border-top {
+            border-top-color: #334155 !important;
+        }
     </style>
 </head>
 

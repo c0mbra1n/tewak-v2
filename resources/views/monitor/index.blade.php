@@ -26,12 +26,21 @@
         .monitoring-header {
             background: linear-gradient(135deg, #4361ee, #3f37c9);
             color: white;
-            padding: 1rem 2rem;
-            /* Reduced padding */
-            border-radius: 0 0 1rem 1rem;
-            /* Rounded bottom only */
-            margin-bottom: 1.5rem;
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            /* Restore full rounded corners */
+            margin-top: 1rem;
+            /* Add top margin */
+            margin-bottom: 2rem;
             box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .legend-container .badge {
+            font-size: 1.1rem;
+            /* Larger legend text */
+            padding: 0.6em 1em;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .monitoring-header h1 {
@@ -208,7 +217,7 @@
     @include('partials.loader')
     <div class="d-flex flex-column min-vh-100">
         <div class="container-fluid px-4 flex-grow-1">
-            <div class="monitoring-header text-center position-relative mx-n4 mt-n4 pt-4">
+            <div class="monitoring-header text-center position-relative mb-4">
                 <h1 class="fw-bold mb-2">Monitoring Keberadaan Guru</h1>
                 <p class="mb-0">
                     <span id="current-time">Loading time...</span>
@@ -224,8 +233,8 @@
                 </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <div class="d-flex gap-2 flex-wrap">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div class="d-flex gap-2 flex-wrap legend-container">
                     <span class="badge status-hadir">Hadir</span>
                     <span class="badge status-telat">Telat</span>
                     <span class="badge status-belum_hadir">Belum Hadir</span>

@@ -413,7 +413,7 @@
 
                 // Photo or initials avatar
                 const avatarHtml = teacher.photo
-                    ? `<img src="${teacher.photo}" class="rounded-circle" style="width: 70px; height: 70px; object-fit: cover; margin-bottom: 0.5rem;">`
+                    ? `<img src="${teacher.photo}" class="rounded-circle d-block mx-auto" style="width: 70px; height: 70px; object-fit: cover; margin-bottom: 0.5rem;">`
                     : `<div class="avatar-circle">${initials}</div>`;
 
                 return `

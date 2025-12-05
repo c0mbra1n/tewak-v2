@@ -70,6 +70,12 @@
         </div>
     </div>
 
+    <footer class="text-center py-3 fixed-bottom">
+        <small class="text-muted">
+            Copyright &copy; {{ date('Y') }} Developed by <strong>c0mbra1n</strong> in Banten 🇮🇩
+        </small>
+    </footer>
+
     <script>
         // Dark Mode Toggle
         const darkModeToggle = document.getElementById('darkModeToggle');

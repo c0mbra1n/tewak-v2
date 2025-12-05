@@ -192,6 +192,12 @@
 
                 @yield('content')
             </div>
+
+            <footer class="bg-white text-center py-3 border-top mt-auto">
+                <small class="text-muted">
+                    Copyright &copy; {{ date('Y') }} Developed by <strong>c0mbra1n</strong> in Banten 🇮🇩
+                </small>
+            </footer>
         </div>
     </div>
 

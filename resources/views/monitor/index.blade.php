@@ -283,6 +283,13 @@
         </div>
     </div>
 
+    <footer class="text-center py-4 mt-4 border-top">
+        <small class="text-muted">
+            Copyright &copy; {{ date('Y') }} Developed by <strong>c0mbra1n</strong> in Banten 🇮🇩
+        </small>
+    </footer>
+    </div>
+
     <script type="module">
         const statusLabels = {
             'hadir': 'HADIR',

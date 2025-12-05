@@ -275,6 +275,14 @@
         </div>
     </div>
 
+    <footer class="bg-white text-center py-3 border-top mt-4">
+        <div class="container">
+            <small class="text-muted">
+                Copyright &copy; {{ date('Y') }} Developed by <strong>c0mbra1n</strong> in Banten 🇮🇩
+            </small>
+        </div>
+    </footer>
+
     <!-- Photo Upload Modal -->
     <div class="modal fade" id="photoModal" tabindex="-1">
         <div class="modal-dialog modal-lg">

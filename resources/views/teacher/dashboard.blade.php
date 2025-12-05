@@ -80,8 +80,12 @@
                     <!-- Profile Photo -->
                     <div class="me-2">
                         @if($user->photo)
-                            <img src="{{ asset('uploads/profiles/' . $user->photo) }}"
-                                class="rounded-circle border border-2 border-light"
+                            @php
+                                $photoUrl = file_exists(public_path('storage/profiles/' . $user->photo))
+                                    ? asset('storage/profiles/' . $user->photo)
+                                    : asset('uploads/profiles/' . $user->photo);
+                            @endphp
+                            <img src="{{ $photoUrl }}" class="rounded-circle border border-2 border-light"
                                 style="width: 35px; height: 35px; object-fit: cover; cursor: pointer;"
                                 data-bs-toggle="modal" data-bs-target="#photoModal" title="Ubah foto profil">
                         @else
@@ -618,7 +622,8 @@
                     }
                 })
                 .catch(err => {
-                    alert('Terjadi kesalahan saat upload foto.');
+                    console.error('Upload Error:', err);
+                    alert('Terjadi kesalahan saat upload foto. Cek console untuk detail.');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Simpan Foto';
                 });

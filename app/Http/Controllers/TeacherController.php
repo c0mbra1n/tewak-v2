@@ -153,20 +153,24 @@ class TeacherController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Format tidak valid'], 400);
         }
 
-        // Create directory if not exists
-        $directory = public_path('uploads/profiles');
-        if (!file_exists($directory)) {
-            mkdir($directory, 0755, true);
-        }
-
-        // Delete old photo if exists
-        if ($user->photo && file_exists(public_path('uploads/profiles/' . $user->photo))) {
-            unlink(public_path('uploads/profiles/' . $user->photo));
-        }
-
         // Generate filename
         $filename = 'user_' . $user->id . '_' . time() . '.' . $type;
-        file_put_contents($directory . '/' . $filename, $imageData);
+        $path = 'profiles/' . $filename;
+
+        // Save to storage/app/public/profiles
+        \Illuminate\Support\Facades\Storage::disk('public')->put($path, $imageData);
+
+        // Delete old photo if exists
+        if ($user->photo) {
+            // Check storage first
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists('profiles/' . $user->photo)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete('profiles/' . $user->photo);
+            }
+            // Check legacy path
+            if (file_exists(public_path('uploads/profiles/' . $user->photo))) {
+                @unlink(public_path('uploads/profiles/' . $user->photo));
+            }
+        }
 
         // Update user
         $user->update(['photo' => $filename]);
@@ -174,7 +178,7 @@ class TeacherController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Foto profil berhasil diupload!',
-            'photo_url' => asset('uploads/profiles/' . $filename)
+            'photo_url' => asset('storage/profiles/' . $filename)
         ]);
     }
 }

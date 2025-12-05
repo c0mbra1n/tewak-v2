@@ -133,6 +133,39 @@
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
+                                    <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal"
+                                        data-bs-target="#resetPasswordModal{{ $teacher->id }}" title="Reset Password">
+                                        <i class="bi bi-key"></i>
+                                    </button>
+
+                                    <!-- Reset Password Modal -->
+                                    <div class="modal fade" id="resetPasswordModal{{ $teacher->id }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Reset Password - {{ $teacher->full_name }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form action="{{ route('admin.users.reset-password', $teacher) }}"
+                                                    method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div class="modal-body text-start">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Password Baru</label>
+                                                            <input type="password" class="form-control" name="password" required
+                                                                minlength="6">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Batal</button>
+                                                        <button type="submit" class="btn btn-warning">Reset Password</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

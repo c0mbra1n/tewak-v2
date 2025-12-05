@@ -137,6 +137,10 @@
                     class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-2 {{ request()->routeIs('admin.manual-attendance.*') ? 'active' : '' }}">
                     <i class="bi bi-pencil-square me-2"></i> Absen Manual
                 </a>
+                <a href="#" class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-2"
+                    data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <i class="bi bi-key me-2"></i> Ganti Password
+                </a>
                 <a href="#"
                     class="list-group-item list-group-item-action list-group-item-light p-3 rounded mb-2 text-danger"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -187,6 +191,40 @@
                 @endif
 
                 @yield('content')
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ganti Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ route('profile.password.update') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Password Saat Ini</label>
+                            <input type="password" class="form-control" name="current_password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password Baru</label>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Konfirmasi Password Baru</label>
+                            <input type="password" class="form-control" name="password_confirmation" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

@@ -7,6 +7,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\AdminKelasController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return redirect()->route('monitor.index');
@@ -17,6 +18,9 @@ Route::post('login', [LoginController::class, 'login']);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
+    // Profile Password Update
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
     // Admin Routes
     Route::prefix('admin')->middleware('role:super_admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
@@ -63,6 +67,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/manual-attendance', [AdminController::class, 'manualAttendance'])->name('manual-attendance.index');
         Route::post('/manual-attendance', [AdminController::class, 'manualAttendanceStore'])->name('manual-attendance.store');
         Route::delete('/manual-attendance/{attendance}', [AdminController::class, 'manualAttendanceDestroy'])->name('manual-attendance.destroy');
+
+        // Reset Password
+        Route::put('/users/{user}/reset-password', [AdminController::class, 'resetPassword'])->name('users.reset-password');
     });
 
     // Teacher Routes

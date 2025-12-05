@@ -570,4 +570,21 @@ class AdminController extends Controller
         return redirect()->route('admin.manual-attendance.index', ['date' => $date])
             ->with('success', 'Status manual berhasil dihapus!');
     }
+
+    // ================================
+    // PASSWORD MANAGEMENT
+    // ================================
+
+    public function resetPassword(Request $request, User $user)
+    {
+        $request->validate([
+            'password' => ['required', 'min:6'],
+        ]);
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return back()->with('success', 'Password user berhasil direset!');
+    }
 }

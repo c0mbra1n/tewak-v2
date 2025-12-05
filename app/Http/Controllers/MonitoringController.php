@@ -38,7 +38,7 @@ class MonitoringController extends Controller
                 return [
                     'id' => $teacher->id,
                     'name' => $teacher->full_name,
-                    'photo' => $teacher->photo ? asset('uploads/profiles/' . $teacher->photo) : null,
+                    'photo' => $teacher->photo ? (file_exists(public_path('storage/profiles/' . $teacher->photo)) ? asset('storage/profiles/' . $teacher->photo) : asset('uploads/profiles/' . $teacher->photo)) : null,
                     'status' => $manualAtt->status,
                     'location' => '-',
                     'time' => Carbon::parse($manualAtt->scan_time)->format('H:i:s'),
@@ -122,7 +122,7 @@ class MonitoringController extends Controller
             return [
                 'id' => $teacher->id,
                 'name' => $teacher->full_name,
-                'photo' => $teacher->photo ? asset('uploads/profiles/' . $teacher->photo) : null,
+                'photo' => $teacher->photo ? (file_exists(public_path('storage/profiles/' . $teacher->photo)) ? asset('storage/profiles/' . $teacher->photo) : asset('uploads/profiles/' . $teacher->photo)) : null,
                 'status' => $status,
                 'location' => $location,
                 'time' => $time,
@@ -181,7 +181,7 @@ class MonitoringController extends Controller
                 $teacher = $schedule->user;
                 $teacherName = $teacher->full_name;
                 $subject = $schedule->subject . ' <br><small class="text-muted">(' . Carbon::parse($schedule->start_time)->format('H:i') . ' - ' . Carbon::parse($schedule->end_time)->format('H:i') . ')</small>';
-                $teacherPhoto = $teacher->photo ? asset('uploads/profiles/' . $teacher->photo) : null;
+                $teacherPhoto = $teacher->photo ? (file_exists(public_path('storage/profiles/' . $teacher->photo)) ? asset('storage/profiles/' . $teacher->photo) : asset('uploads/profiles/' . $teacher->photo)) : null;
 
                 // Check attendance
                 $attendance = Attendance::where('user_id', $teacher->id)

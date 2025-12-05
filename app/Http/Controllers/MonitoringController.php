@@ -24,7 +24,29 @@ class MonitoringController extends Controller
         // Get all teachers
         $teachers = User::where('role', 'guru')->get();
 
-        $data = $teachers->map(function ($teacher) use ($today, $dayName, $now) {
+        // Get manual attendances for today (izin, sakit, dinas)
+        $manualAttendances = Attendance::where('date', $today)
+            ->whereIn('status', ['izin', 'sakit', 'dinas'])
+            ->whereNull('class_id')
+            ->get()
+            ->keyBy('user_id');
+
+        $data = $teachers->map(function ($teacher) use ($today, $dayName, $now, $manualAttendances) {
+            // Check for manual attendance first (izin, sakit, dinas)
+            $manualAtt = $manualAttendances->get($teacher->id);
+            if ($manualAtt) {
+                return [
+                    'id' => $teacher->id,
+                    'name' => $teacher->full_name,
+                    'photo' => $teacher->photo ? asset('uploads/profiles/' . $teacher->photo) : null,
+                    'status' => $manualAtt->status,
+                    'location' => '-',
+                    'time' => Carbon::parse($manualAtt->scan_time)->format('H:i:s'),
+                    'subject' => $manualAtt->subject ?? ucfirst($manualAtt->status),
+                    'schedule' => null,
+                ];
+            }
+
             // Get today's schedule for this teacher
             $schedules = Schedule::with('classRoom')
                 ->where('user_id', $teacher->id)
@@ -35,6 +57,7 @@ class MonitoringController extends Controller
             // Get today's attendance for this teacher
             $attendances = Attendance::where('user_id', $teacher->id)
                 ->where('date', $today)
+                ->whereNotNull('class_id') // Exclude manual attendance
                 ->with('classRoom')
                 ->get();
 
@@ -99,12 +122,99 @@ class MonitoringController extends Controller
             return [
                 'id' => $teacher->id,
                 'name' => $teacher->full_name,
-                'photo' => null,
+                'photo' => $teacher->photo ? asset('uploads/profiles/' . $teacher->photo) : null,
                 'status' => $status,
                 'location' => $location,
                 'time' => $time,
                 'subject' => $subject,
                 'schedule' => $scheduleInfo,
+            ];
+        });
+
+        return response()->json($data);
+    }
+
+    public function getBlockData(Request $request)
+    {
+        $block = $request->input('block');
+        if (!$block) {
+            return response()->json([]);
+        }
+
+        $today = date('Y-m-d');
+        $now = Carbon::now();
+        $dayName = $now->locale('en')->dayName;
+
+        // Get classes in this block
+        $classes = \App\Models\ClassRoom::where('block', $block)->get();
+
+        $data = $classes->map(function ($class) use ($today, $dayName, $now) {
+            // Get current schedule for this class
+            $schedule = Schedule::with('user')
+                ->where('class_id', $class->id)
+                ->where('day', $dayName)
+                ->where('start_time', '<=', $now->format('H:i:s'))
+                ->where('end_time', '>=', $now->format('H:i:s'))
+                ->first();
+
+            // If no current schedule, find next schedule
+            if (!$schedule) {
+                $schedule = Schedule::with('user')
+                    ->where('class_id', $class->id)
+                    ->where('day', $dayName)
+                    ->where('start_time', '>', $now->format('H:i:s'))
+                    ->orderBy('start_time')
+                    ->first();
+
+                $status = 'tidak_ada_jadwal';
+                $teacherName = '-';
+                $subject = '-';
+                $time = '-';
+                $teacherPhoto = null;
+
+                if ($schedule) {
+                    $status = 'menunggu_jadwal';
+                    $subject = $schedule->subject . ' <br><small class="text-muted">(' . Carbon::parse($schedule->start_time)->format('H:i') . ' - ' . Carbon::parse($schedule->end_time)->format('H:i') . ')</small>';
+                }
+            } else {
+                // Found active schedule
+                $teacher = $schedule->user;
+                $teacherName = $teacher->full_name;
+                $subject = $schedule->subject . ' <br><small class="text-muted">(' . Carbon::parse($schedule->start_time)->format('H:i') . ' - ' . Carbon::parse($schedule->end_time)->format('H:i') . ')</small>';
+                $teacherPhoto = $teacher->photo ? asset('uploads/profiles/' . $teacher->photo) : null;
+
+                // Check attendance
+                $attendance = Attendance::where('user_id', $teacher->id)
+                    ->where('class_id', $class->id)
+                    ->where('subject', $schedule->subject)
+                    ->where('date', $today)
+                    ->first();
+
+                if ($attendance) {
+                    $status = $attendance->status;
+                    $time = Carbon::parse($attendance->scan_time)->format('H:i:s');
+                } else {
+                    $endTime = Carbon::parse($schedule->end_time);
+                    $lateThreshold = Carbon::parse($schedule->start_time)->addMinutes(15);
+
+                    if ($now->gte($endTime)) {
+                        $status = 'tidak_hadir';
+                    } elseif ($now->gte($lateThreshold)) {
+                        $status = 'belum_hadir_telat';
+                    } else {
+                        $status = 'belum_hadir';
+                    }
+                    $time = '-';
+                }
+            }
+
+            return [
+                'class_name' => $class->class_name,
+                'subject' => $subject,
+                'teacher_name' => $teacherName ?? '-',
+                'teacher_photo' => $teacherPhoto ?? null,
+                'status' => $status,
+                'time' => $time ?? '-',
             ];
         });
 

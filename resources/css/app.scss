@@ -20,12 +20,14 @@ $dark: #212529;
 body {
     background-color: #f0f2f5;
     font-family: $font-family-sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .card {
     border: none;
     border-radius: 1rem;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .btn-primary {
@@ -40,8 +42,220 @@ body {
 .form-control {
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 
     &:focus {
         box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+    }
+}
+
+// Dark Mode Toggle Button
+.dark-mode-toggle {
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    i {
+        font-size: 1.2rem;
+    }
+}
+
+// ============================================
+// DARK MODE STYLES
+// ============================================
+[data-theme="dark"] {
+
+    // Body
+    body,
+    .bg-light {
+        background-color: #1a1a2e !important;
+        color: #e4e4e4;
+    }
+
+    // Cards
+    .card {
+        background-color: #16213e !important;
+        color: #e4e4e4;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header {
+        background-color: #1a1a2e !important;
+        border-color: #2d2d44 !important;
+        color: #e4e4e4 !important;
+    }
+
+    // Tables
+    .table {
+        color: #e4e4e4;
+        --bs-table-bg: #16213e;
+        --bs-table-hover-bg: #1f2b47;
+    }
+
+    .table thead {
+        background-color: #1a1a2e !important;
+    }
+
+    .table thead th {
+        background-color: #1a1a2e !important;
+        color: #adb5bd;
+        border-color: #2d2d44 !important;
+    }
+
+    .table td,
+    .table th {
+        border-color: #2d2d44 !important;
+    }
+
+    // Forms
+    .form-control,
+    .form-select {
+        background-color: #1a1a2e !important;
+        border-color: #2d2d44 !important;
+        color: #e4e4e4 !important;
+
+        &:focus {
+            background-color: #16213e !important;
+            border-color: $primary !important;
+        }
+
+        &::placeholder {
+            color: #6c757d;
+        }
+    }
+
+    // Navbar
+    .navbar-dark,
+    .bg-primary {
+        background: linear-gradient(135deg, #16213e, #1a1a2e) !important;
+    }
+
+    .navbar-light,
+    .bg-white {
+        background-color: #16213e !important;
+    }
+
+    // Sidebar
+    .bg-dark {
+        background-color: #0f0f1a !important;
+    }
+
+    .list-group-item {
+        background-color: transparent !important;
+        border-color: #2d2d44 !important;
+        color: #e4e4e4 !important;
+
+        &:hover,
+        &.active {
+            background-color: rgba($primary, 0.2) !important;
+        }
+    }
+
+    // Text
+    .text-muted {
+        color: #8b8b9a !important;
+    }
+
+    .text-dark {
+        color: #e4e4e4 !important;
+    }
+
+    // Borders
+    .border,
+    .border-bottom {
+        border-color: #2d2d44 !important;
+    }
+
+    // Alerts
+    .alert-info {
+        background-color: rgba($info, 0.2) !important;
+        border-color: rgba($info, 0.3) !important;
+        color: lighten($info, 20%);
+    }
+
+    .alert-success {
+        background-color: rgba($success, 0.2) !important;
+        border-color: rgba($success, 0.3) !important;
+        color: lighten($success, 10%);
+    }
+
+    .alert-danger {
+        background-color: rgba($danger, 0.2) !important;
+        border-color: rgba($danger, 0.3) !important;
+        color: lighten($danger, 20%);
+    }
+
+    // Modals
+    .modal-content {
+        background-color: #16213e !important;
+        color: #e4e4e4;
+        border-color: #2d2d44;
+    }
+
+    .modal-header,
+    .modal-footer {
+        border-color: #2d2d44 !important;
+    }
+
+    .btn-close {
+        filter: invert(1);
+    }
+
+    // Dropdowns
+    .dropdown-menu {
+        background-color: #16213e !important;
+        border-color: #2d2d44;
+    }
+
+    .dropdown-item {
+        color: #e4e4e4 !important;
+
+        &:hover {
+            background-color: #1f2b47 !important;
+        }
+    }
+
+    // Dark mode toggle
+    .dark-mode-toggle {
+        color: #ffd700;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    // Monitoring header
+    .monitoring-header {
+        background: linear-gradient(135deg, #16213e, #1a1a2e) !important;
+    }
+
+    // Schedule info
+    .schedule-info {
+        background-color: #1a1a2e !important;
+    }
+
+    // Code blocks
+    code {
+        background-color: #1a1a2e !important;
+        color: #7dd3fc;
+    }
+
+    // Avatar circle bg colors
+    .avatar-circle.bg-primary {
+        background-color: #4361ee !important;
+    }
+
+    .avatar-circle.bg-info {
+        background-color: #4895ef !important;
     }
 }

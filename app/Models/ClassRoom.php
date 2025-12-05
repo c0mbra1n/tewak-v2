@@ -17,5 +17,6 @@ class ClassRoom extends Model
         'latitude',
         'longitude',
         'radius',
+        'block',
     ];
 }

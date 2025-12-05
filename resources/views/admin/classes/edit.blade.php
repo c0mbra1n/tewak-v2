@@ -62,6 +62,23 @@
                             @enderror
                         </div>
 
+                        <div class="mb-3">
+                            <label for="block" class="form-label">Blok Monitoring</label>
+                            <select class="form-select @error('block') is-invalid @enderror" id="block" name="block">
+                                <option value="">-- Tidak ada --</option>
+                                @for($i = 1; $i <= 10; $i++)
+                                    <option value="{{ $i }}" {{ old('block', $classRoom->block) == $i ? 'selected' : '' }}>
+                                        Blok {{ $i }}
+                                    </option>
+                                @endfor
+                            </select>
+                            <small class="text-muted">Pilih blok untuk menampilkan kelas ini di halaman monitoring
+                                blok</small>
+                            @error('block')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="mb-4">
                             <button type="button" class="btn btn-outline-info btn-sm" id="btn-get-location">
                                 <i class="bi bi-geo-alt me-1"></i> Gunakan Lokasi Saat Ini

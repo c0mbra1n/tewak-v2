@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\ClassRoom;
 use App\Models\Schedule;
+use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -37,13 +38,37 @@ class AdminController extends Controller
 
     public function teachers()
     {
-        $teachers = User::whereIn('role', ['guru', 'admin_kelas'])->latest()->get();
+        $teachers = User::with(['assignedClass', 'subjects'])->whereIn('role', ['guru', 'admin_kelas'])->latest()->get();
         return view('admin.teachers.index', compact('teachers'));
+    }
+
+    public function teacherImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\UsersImport, $request->file('file'));
+            return redirect()->route('admin.teachers.index')->with('success', 'Data user berhasil diimport!');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.teachers.index')->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+    public function teacherTemplate()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\UsersTemplateExport,
+            'template_import_user.xlsx'
+        );
     }
 
     public function teacherCreate()
     {
-        return view('admin.teachers.create');
+        $classes = ClassRoom::all();
+        $subjects = Subject::orderBy('name')->get();
+        return view('admin.teachers.create', compact('classes', 'subjects'));
     }
 
     public function teacherStore(Request $request)
@@ -52,17 +77,23 @@ class AdminController extends Controller
             'username' => 'required|unique:users,username',
             'full_name' => 'required|string|max:255',
             'role' => 'required|in:guru,admin_kelas',
-            'subject' => 'nullable|string|max:255',
+            'subjects' => 'nullable|array',
+            'subjects.*' => 'exists:subjects,id',
             'password' => 'required|min:6',
         ]);
 
-        User::create([
+        $user = User::create([
             'username' => $request->username,
             'full_name' => $request->full_name,
-            'subject' => $request->subject,
             'role' => $request->role,
+            'class_id' => $request->role === 'admin_kelas' ? $request->class_id : null,
             'password' => Hash::make($request->password),
         ]);
+
+        // Attach subjects for guru
+        if ($request->role === 'guru' && $request->subjects) {
+            $user->subjects()->attach($request->subjects);
+        }
 
         $roleLabel = $request->role === 'guru' ? 'Guru' : 'Admin Kelas';
         return redirect()->route('admin.teachers.index')->with('success', "$roleLabel berhasil ditambahkan!");
@@ -70,7 +101,9 @@ class AdminController extends Controller
 
     public function teacherEdit(User $user)
     {
-        return view('admin.teachers.edit', compact('user'));
+        $classes = ClassRoom::all();
+        $subjects = Subject::orderBy('name')->get();
+        return view('admin.teachers.edit', compact('user', 'classes', 'subjects'));
     }
 
     public function teacherUpdate(Request $request, User $user)
@@ -79,15 +112,16 @@ class AdminController extends Controller
             'username' => 'required|unique:users,username,' . $user->id,
             'full_name' => 'required|string|max:255',
             'role' => 'required|in:guru,admin_kelas',
-            'subject' => 'nullable|string|max:255',
+            'subjects' => 'nullable|array',
+            'subjects.*' => 'exists:subjects,id',
             'password' => 'nullable|min:6',
         ]);
 
         $data = [
             'username' => $request->username,
             'full_name' => $request->full_name,
-            'subject' => $request->subject,
             'role' => $request->role,
+            'class_id' => $request->role === 'admin_kelas' ? $request->class_id : null,
         ];
 
         if ($request->filled('password')) {
@@ -95,6 +129,13 @@ class AdminController extends Controller
         }
 
         $user->update($data);
+
+        // Sync subjects for guru
+        if ($request->role === 'guru') {
+            $user->subjects()->sync($request->subjects ?? []);
+        } else {
+            $user->subjects()->detach();
+        }
 
         return redirect()->route('admin.teachers.index')->with('success', 'Data user berhasil diperbarui!');
     }
@@ -127,6 +168,7 @@ class AdminController extends Controller
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'radius' => 'required|numeric|min:1',
+            'block' => 'nullable|integer|between:1,10',
         ]);
 
         $qrCode = 'CLASS_' . strtoupper(str_replace(' ', '_', $request->class_name)) . '_' . time();
@@ -137,6 +179,7 @@ class AdminController extends Controller
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'radius' => $request->radius,
+            'block' => $request->block,
         ]);
 
         return redirect()->route('admin.classes.index')->with('success', 'Kelas berhasil ditambahkan!');
@@ -154,6 +197,7 @@ class AdminController extends Controller
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'radius' => 'required|numeric|min:1',
+            'block' => 'nullable|integer|between:1,10',
         ]);
 
         $classRoom->update([
@@ -161,6 +205,7 @@ class AdminController extends Controller
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'radius' => $request->radius,
+            'block' => $request->block,
         ]);
 
         return redirect()->route('admin.classes.index')->with('success', 'Data kelas berhasil diperbarui!');
@@ -178,38 +223,140 @@ class AdminController extends Controller
 
     public function attendance(Request $request)
     {
+        $filterType = $request->get('filter_type', 'day');
         $date = $request->get('date', date('Y-m-d'));
+        $month = $request->get('month', date('m'));
+        $year = $request->get('year', date('Y'));
         $status = $request->get('status');
+        $userId = $request->get('user_id');
+        $classId = $request->get('class_id');
 
-        $query = Attendance::with(['user', 'classRoom'])->where('date', $date);
+        $query = Attendance::with(['user', 'classRoom']);
 
+        // Apply date filter based on filter type
+        if ($filterType === 'day') {
+            $query->where('date', $date);
+        } elseif ($filterType === 'month') {
+            $query->whereMonth('date', $month)->whereYear('date', $year);
+        } elseif ($filterType === 'year') {
+            $query->whereYear('date', $year);
+        }
+
+        // Apply other filters
         if ($status) {
             $query->where('status', $status);
         }
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+        if ($classId) {
+            $query->where('class_id', $classId);
+        }
 
-        $attendances = $query->latest('scan_time')->get();
+        $attendances = $query->latest('date')->latest('scan_time')->get();
 
-        // Summary stats
+        // Summary stats based on current filter
+        $summaryQuery = clone $query;
         $summary = [
-            'hadir' => Attendance::where('date', $date)->where('status', 'hadir')->count(),
-            'telat' => Attendance::where('date', $date)->where('status', 'telat')->count(),
-            'izin' => Attendance::where('date', $date)->where('status', 'izin')->count(),
-            'sakit' => Attendance::where('date', $date)->where('status', 'sakit')->count(),
-            'alpa' => Attendance::where('date', $date)->where('status', 'alpa')->count(),
+            'hadir' => (clone $summaryQuery)->where('status', 'hadir')->count(),
+            'telat' => (clone $summaryQuery)->where('status', 'telat')->count(),
+            'izin' => (clone $summaryQuery)->where('status', 'izin')->count(),
+            'sakit' => (clone $summaryQuery)->where('status', 'sakit')->count(),
+            'alpa' => (clone $summaryQuery)->where('status', 'alpa')->count(),
+            'dinas' => (clone $summaryQuery)->where('status', 'dinas')->count(),
         ];
 
-        return view('admin.attendance.index', compact('attendances', 'date', 'status', 'summary'));
+        // Get teachers and classes for filter dropdowns
+        $teachers = User::where('role', 'guru')->orderBy('full_name')->get();
+        $classes = ClassRoom::orderBy('class_name')->get();
+
+        return view('admin.attendance.index', compact(
+            'attendances',
+            'date',
+            'month',
+            'year',
+            'status',
+            'filterType',
+            'userId',
+            'classId',
+            'summary',
+            'teachers',
+            'classes'
+        ));
+    }
+
+    public function attendanceExport(Request $request)
+    {
+        $filterType = $request->get('filter_type', 'day');
+        $date = $request->get('date', date('Y-m-d'));
+        $month = $request->get('month', date('m'));
+        $year = $request->get('year', date('Y'));
+        $status = $request->get('status');
+        $userId = $request->get('user_id');
+        $classId = $request->get('class_id');
+        $format = $request->get('format', 'xlsx');
+
+        $query = Attendance::with(['user', 'classRoom']);
+
+        // Apply date filter based on filter type
+        if ($filterType === 'day') {
+            $query->where('date', $date);
+        } elseif ($filterType === 'month') {
+            $query->whereMonth('date', $month)->whereYear('date', $year);
+        } elseif ($filterType === 'year') {
+            $query->whereYear('date', $year);
+        }
+
+        // Apply other filters
+        if ($status) {
+            $query->where('status', $status);
+        }
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+        if ($classId) {
+            $query->where('class_id', $classId);
+        }
+
+        $attendances = $query->latest('date')->latest('scan_time')->get();
+
+        $filename = 'laporan_absensi_' . date('Y-m-d_His');
+
+        if ($format === 'pdf') {
+            return $this->exportPdf($attendances, $filename);
+        }
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\AttendanceExport($attendances),
+            $filename . '.xlsx'
+        );
+    }
+
+    private function exportPdf($attendances, $filename)
+    {
+        $html = view('admin.attendance.pdf', compact('attendances'))->render();
+
+        // Using simple HTML to PDF approach
+        return response($html)
+            ->header('Content-Type', 'text/html')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '.html"');
     }
 
     public function updateAttendanceStatus(Request $request, Attendance $attendance)
     {
         $request->validate([
-            'status' => 'required|in:hadir,telat,izin,sakit,alpa',
+            'status' => 'required|in:hadir,telat,izin,sakit,alpa,dinas',
         ]);
 
         $attendance->update(['status' => $request->status]);
 
         return redirect()->back()->with('success', 'Status kehadiran berhasil diubah!');
+    }
+
+    public function attendanceDestroy(Attendance $attendance)
+    {
+        $attendance->delete();
+        return redirect()->back()->with('success', 'Data absensi berhasil dihapus!');
     }
 
     // ================================
@@ -230,8 +377,9 @@ class AdminController extends Controller
 
         $teachers = User::where('role', 'guru')->get();
         $classes = ClassRoom::all();
+        $subjects = Subject::orderBy('name')->get();
 
-        return view('admin.schedules.index', compact('schedules', 'teachers', 'classes'));
+        return view('admin.schedules.index', compact('schedules', 'teachers', 'classes', 'subjects'));
     }
 
     public function scheduleCreate()
@@ -272,5 +420,154 @@ class AdminController extends Controller
     {
         $schedule->delete();
         return redirect()->route('admin.schedules.index')->with('success', 'Jadwal berhasil dihapus!');
+    }
+
+    public function getTeacherSubjects(User $user)
+    {
+        $subjects = $user->subjects()->orderBy('name')->get(['subjects.id', 'subjects.name']);
+        return response()->json($subjects);
+    }
+
+    // ================================
+    // SUBJECTS MANAGEMENT
+    // ================================
+
+    public function subjects()
+    {
+        $subjects = Subject::withCount('users')->orderBy('name')->get();
+        return view('admin.subjects.index', compact('subjects'));
+    }
+
+    public function subjectStore(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:subjects,name',
+            'code' => 'nullable|string|max:20',
+        ]);
+
+        Subject::create([
+            'name' => $request->name,
+            'code' => $request->code,
+        ]);
+
+        return redirect()->route('admin.subjects.index')->with('success', 'Mata pelajaran berhasil ditambahkan!');
+    }
+
+    public function subjectUpdate(Request $request, Subject $subject)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:subjects,name,' . $subject->id,
+            'code' => 'nullable|string|max:20',
+        ]);
+
+        $subject->update([
+            'name' => $request->name,
+            'code' => $request->code,
+        ]);
+
+        return redirect()->route('admin.subjects.index')->with('success', 'Mata pelajaran berhasil diperbarui!');
+    }
+
+    public function subjectDestroy(Subject $subject)
+    {
+        if ($subject->users()->count() > 0) {
+            return redirect()->route('admin.subjects.index')->with('error', 'Tidak bisa menghapus mapel yang masih digunakan guru!');
+        }
+
+        $subject->delete();
+        return redirect()->route('admin.subjects.index')->with('success', 'Mata pelajaran berhasil dihapus!');
+    }
+
+    public function subjectImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\SubjectsImport, $request->file('file'));
+            return redirect()->route('admin.subjects.index')->with('success', 'Data mapel berhasil diimport!');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.subjects.index')->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+    public function subjectTemplate()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\SubjectsTemplateExport,
+            'template_import_mapel.xlsx'
+        );
+    }
+
+    // ================================
+    // MANUAL ATTENDANCE
+    // ================================
+
+    public function manualAttendance(Request $request)
+    {
+        $date = $request->get('date', date('Y-m-d'));
+
+        // Get teachers with their manual attendance for today
+        $teachers = User::where('role', 'guru')->get();
+
+        // Get today's manual attendances (izin, sakit, dinas)
+        $manualAttendances = Attendance::with('user')
+            ->where('date', $date)
+            ->whereIn('status', ['izin', 'sakit', 'dinas'])
+            ->whereNull('class_id') // Manual attendance has no class
+            ->get()
+            ->keyBy('user_id');
+
+        return view('admin.manual-attendance.index', compact('teachers', 'manualAttendances', 'date'));
+    }
+
+    public function manualAttendanceStore(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'status' => 'required|in:izin,sakit,dinas',
+            'date' => 'required|date',
+            'notes' => 'nullable|string|max:255',
+        ]);
+
+        $today = $request->date;
+
+        // Check if already has manual attendance
+        $existing = Attendance::where('user_id', $request->user_id)
+            ->where('date', $today)
+            ->whereIn('status', ['izin', 'sakit', 'dinas'])
+            ->whereNull('class_id')
+            ->first();
+
+        if ($existing) {
+            // Update existing
+            $existing->update([
+                'status' => $request->status,
+                'subject' => $request->notes ?? ucfirst($request->status),
+            ]);
+        } else {
+            // Create new manual attendance
+            Attendance::create([
+                'user_id' => $request->user_id,
+                'class_id' => null,
+                'status' => $request->status,
+                'date' => $today,
+                'subject' => $request->notes ?? ucfirst($request->status),
+                'scan_time' => now(),
+            ]);
+        }
+
+        $statusLabel = ['izin' => 'Izin', 'sakit' => 'Sakit', 'dinas' => 'Dinas Luar'];
+        return redirect()->route('admin.manual-attendance.index', ['date' => $today])
+            ->with('success', 'Status guru berhasil diubah menjadi ' . $statusLabel[$request->status]);
+    }
+
+    public function manualAttendanceDestroy(Attendance $attendance)
+    {
+        $date = $attendance->date;
+        $attendance->delete();
+        return redirect()->route('admin.manual-attendance.index', ['date' => $date])
+            ->with('success', 'Status manual berhasil dihapus!');
     }
 }

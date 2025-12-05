@@ -135,4 +135,64 @@ class AttendanceController extends Controller
 
         return $earthRadius * $c;
     }
+
+    public function uploadPhoto(Request $request, Attendance $attendance)
+    {
+        $user = Auth::user();
+
+        if ($attendance->user_id !== $user->id) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'photo' => 'required|string', // Base64 image
+        ]);
+
+        // Decode base64 image
+        $imageData = $request->photo;
+
+        // Remove data:image/xxx;base64, prefix
+        if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+            $imageData = substr($imageData, strpos($imageData, ',') + 1);
+            $type = strtolower($type[1]); // jpg, png, gif
+
+            if (!in_array($type, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                return response()->json(['status' => 'error', 'message' => 'Invalid image type'], 400);
+            }
+
+            $imageData = base64_decode($imageData);
+            if ($imageData === false) {
+                return response()->json(['status' => 'error', 'message' => 'Base64 decode failed'], 400);
+            }
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Invalid image format'], 400);
+        }
+
+        // Create directory if not exists
+        $directory = public_path('uploads/attendance');
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        // Generate filename
+        $filename = 'att_' . $attendance->id . '_' . time() . '.' . $type;
+        $filepath = $directory . '/' . $filename;
+
+        // Save file
+        file_put_contents($filepath, $imageData);
+
+        // Delete old photo if exists
+        if ($attendance->photo && file_exists(public_path('uploads/attendance/' . $attendance->photo))) {
+            unlink(public_path('uploads/attendance/' . $attendance->photo));
+        }
+
+        // Update attendance
+        $attendance->update(['photo' => $filename]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Foto berhasil diupload!',
+            'photo_url' => asset('uploads/attendance/' . $filename)
+        ]);
+    }
 }

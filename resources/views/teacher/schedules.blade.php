@@ -7,26 +7,49 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Jadwal Mengajar - Tewak</title>
     @vite(['resources/css/app.scss', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    @include('partials.loader')
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ route('teacher.dashboard') }}">Tewak Guru</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <a class="navbar-brand fw-bold" href="{{ route('teacher.dashboard') }}">Tewak</a>
+            <div class="d-flex align-items-center d-lg-none order-lg-1">
+                <button type="button" class="btn btn-link text-white p-1 me-1" id="darkModeToggleMobile"
+                    title="Toggle Dark Mode">
+                    <i class="bi bi-moon-fill" id="darkModeIconMobile"></i>
+                </button>
+                <button class="navbar-toggler border-0 p-1" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('teacher.dashboard') }}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ route('teacher.schedules') }}">Jadwal Mengajar</a>
+                        <a class="nav-link active" href="{{ route('teacher.schedules') }}">Jadwal</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('monitor.index') }}" target="_blank">
+                            <i class="bi bi-display me-1"></i> Monitoring
+                        </a>
                     </li>
                 </ul>
-                <div class="d-flex align-items-center">
-                    <span class="text-white me-3">{{ $user->full_name }}</span>
+                <div class="d-flex align-items-center mt-3 mt-lg-0">
+                    <button type="button" class="dark-mode-toggle btn btn-link text-white p-2 me-2 d-none d-lg-block"
+                        id="darkModeToggle" title="Toggle Dark Mode">
+                        <i class="bi bi-moon-fill" id="darkModeIcon"></i>
+                    </button>
+                    <span class="text-white me-3 d-none d-lg-inline">{{ $user->full_name }}</span>
                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
@@ -36,7 +59,7 @@
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container py-3 py-lg-4">
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
@@ -52,98 +75,97 @@
 
         <div class="row">
             <!-- Form Tambah Jadwal -->
-            <div class="col-lg-5 mb-4">
+            <div class="col-12 col-lg-5 mb-3 mb-lg-4">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Tambah Jadwal</h5>
+                    <div class="card-header bg-primary text-white py-2 py-lg-3">
+                        <h5 class="mb-0 fs-6 fs-lg-5"><i class="bi bi-plus-circle me-2"></i>Tambah Jadwal</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-3">
                         <form action="{{ route('teacher.schedules.store') }}" method="POST">
                             @csrf
 
-                            <div class="mb-3">
-                                <label for="day" class="form-label">Hari <span class="text-danger">*</span></label>
-                                <select class="form-select @error('day') is-invalid @enderror" id="day" name="day"
-                                    required>
-                                    <option value="">Pilih Hari</option>
-                                    <option value="Monday" {{ old('day') == 'Monday' ? 'selected' : '' }}>Senin</option>
-                                    <option value="Tuesday" {{ old('day') == 'Tuesday' ? 'selected' : '' }}>Selasa
-                                    </option>
-                                    <option value="Wednesday" {{ old('day') == 'Wednesday' ? 'selected' : '' }}>Rabu
-                                    </option>
-                                    <option value="Thursday" {{ old('day') == 'Thursday' ? 'selected' : '' }}>Kamis
-                                    </option>
-                                    <option value="Friday" {{ old('day') == 'Friday' ? 'selected' : '' }}>Jumat</option>
-                                    <option value="Saturday" {{ old('day') == 'Saturday' ? 'selected' : '' }}>Sabtu
-                                    </option>
-                                </select>
-                                @error('day')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label for="day" class="form-label small">Hari <span
+                                            class="text-danger">*</span></label>
+                                    <select class="form-select form-select-sm @error('day') is-invalid @enderror"
+                                        id="day" name="day" required>
+                                        <option value="">Pilih</option>
+                                        <option value="Monday" {{ old('day') == 'Monday' ? 'selected' : '' }}>Senin
+                                        </option>
+                                        <option value="Tuesday" {{ old('day') == 'Tuesday' ? 'selected' : '' }}>Selasa
+                                        </option>
+                                        <option value="Wednesday" {{ old('day') == 'Wednesday' ? 'selected' : '' }}>Rabu
+                                        </option>
+                                        <option value="Thursday" {{ old('day') == 'Thursday' ? 'selected' : '' }}>Kamis
+                                        </option>
+                                        <option value="Friday" {{ old('day') == 'Friday' ? 'selected' : '' }}>Jumat
+                                        </option>
+                                        <option value="Saturday" {{ old('day') == 'Saturday' ? 'selected' : '' }}>Sabtu
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label for="class_id" class="form-label small">Kelas <span
+                                            class="text-danger">*</span></label>
+                                    <select class="form-select form-select-sm @error('class_id') is-invalid @enderror"
+                                        id="class_id" name="class_id" required>
+                                        <option value="">Pilih</option>
+                                        @foreach($classes as $class)
+                                            <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>
+                                                {{ $class->class_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="class_id" class="form-label">Kelas <span
+                                <label for="subject" class="form-label small">Mata Pelajaran <span
                                         class="text-danger">*</span></label>
-                                <select class="form-select @error('class_id') is-invalid @enderror" id="class_id"
-                                    name="class_id" required>
-                                    <option value="">Pilih Kelas</option>
-                                    @foreach($classes as $class)
-                                        <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>
-                                            {{ $class->class_name }}
+                                <select class="form-select form-select-sm @error('subject') is-invalid @enderror"
+                                    id="subject" name="subject" required>
+                                    <option value="">Pilih Mapel</option>
+                                    @foreach($user->subjects as $subj)
+                                        <option value="{{ $subj->name }}" {{ old('subject') == $subj->name ? 'selected' : '' }}>
+                                            {{ $subj->name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @error('class_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="subject" class="form-label">Mata Pelajaran <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('subject') is-invalid @enderror"
-                                    id="subject" name="subject" value="{{ old('subject') }}" required
-                                    placeholder="Contoh: Matematika">
-                                @error('subject')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                @if($user->subjects->isEmpty())
+                                    <small class="text-danger">Mapel belum diatur admin</small>
+                                @endif
                             </div>
 
                             <div class="row">
                                 <div class="col-6 mb-3">
-                                    <label for="start_time" class="form-label">Jam Mulai <span
+                                    <label for="start_time" class="form-label small">Jam <span
                                             class="text-danger">*</span></label>
-                                    <input type="time" class="form-control @error('start_time') is-invalid @enderror"
+                                    <input type="time"
+                                        class="form-control form-control-sm @error('start_time') is-invalid @enderror"
                                         id="start_time" name="start_time" value="{{ old('start_time') }}" required>
-                                    @error('start_time')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
                                 <div class="col-6 mb-3">
-                                    <label for="lesson_hours" class="form-label">Jumlah JP <span
+                                    <label for="lesson_hours" class="form-label small">JP <span
                                             class="text-danger">*</span></label>
-                                    <select class="form-select @error('lesson_hours') is-invalid @enderror"
+                                    <select
+                                        class="form-select form-select-sm @error('lesson_hours') is-invalid @enderror"
                                         id="lesson_hours" name="lesson_hours" required>
                                         @for($i = 1; $i <= 8; $i++)
                                             <option value="{{ $i }}" {{ old('lesson_hours', 2) == $i ? 'selected' : '' }}>
-                                                {{ $i }} JP ({{ $i * 45 }} menit)
+                                                {{ $i }} JP
                                             </option>
                                         @endfor
                                     </select>
-                                    @error('lesson_hours')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
                             </div>
 
-                            <div class="alert alert-info small py-2">
-                                <i class="bi bi-info-circle me-1"></i> 1 JP = 45 menit. Toleransi telat = 15 menit dari
-                                jam mulai.
+                            <div class="alert alert-info small py-2 mb-3">
+                                <i class="bi bi-info-circle me-1"></i> 1 JP = 45 menit
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-check-lg me-1"></i> Simpan Jadwal
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-check-lg me-1"></i> Simpan
                             </button>
                         </form>
                     </div>
@@ -151,13 +173,63 @@
             </div>
 
             <!-- Daftar Jadwal -->
-            <div class="col-lg-7 mb-4">
+            <div class="col-12 col-lg-7 mb-3 mb-lg-4">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0 fw-bold"><i class="bi bi-calendar3 me-2"></i>Jadwal Mengajar Saya</h5>
+                    <div class="card-header bg-white py-2 py-lg-3">
+                        <h5 class="mb-0 fw-bold fs-6 fs-lg-5"><i class="bi bi-calendar3 me-2"></i>Jadwal Saya</h5>
                     </div>
                     <div class="card-body p-0">
-                        <div class="table-responsive">
+                        <!-- Mobile View -->
+                        <div class="d-lg-none">
+                            @forelse($schedules as $schedule)
+                                <div class="p-3 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <div class="fw-bold small">{{ $schedule->subject }}</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">
+                                                {{ $schedule->classRoom->class_name ?? '-' }}
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-1">
+                                            <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2"
+                                                data-bs-toggle="modal" data-bs-target="#editModal{{ $schedule->id }}">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 btn-delete"
+                                                data-form="delete-form-{{ $schedule->id }}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                            <form id="delete-form-{{ $schedule->id }}"
+                                                action="{{ route('teacher.schedules.destroy', $schedule) }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2 text-muted" style="font-size: 0.75rem;">
+                                        @php
+                                            $days = ['Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+                                        @endphp
+                                        <span><i
+                                                class="bi bi-calendar me-1"></i>{{ $days[$schedule->day] ?? $schedule->day }}</span>
+                                        <span>
+                                            <i class="bi bi-clock me-1"></i>
+                                            {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} -
+                                            {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
+                                        </span>
+                                        <span class="badge bg-secondary">{{ $schedule->lesson_hours }} JP</span>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-center py-4 text-muted small">
+                                    Belum ada jadwal. Tambahkan jadwal mengajar Anda.
+                                </div>
+                            @endforelse
+                        </div>
+
+                        <!-- Desktop View -->
+                        <div class="table-responsive d-none d-lg-block">
                             <table class="table table-hover mb-0">
                                 <thead class="bg-light">
                                     <tr>
@@ -189,13 +261,19 @@
                                             <td><span class="badge bg-secondary">{{ $schedule->lesson_hours }} JP</span>
                                             </td>
                                             <td>
-                                                <form action="{{ route('teacher.schedules.destroy', $schedule) }}"
-                                                    method="POST" onsubmit="return confirm('Hapus jadwal ini?')">
+                                                <button type="button" class="btn btn-sm btn-outline-primary me-1"
+                                                    data-bs-toggle="modal" data-bs-target="#editModal{{ $schedule->id }}">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger btn-delete"
+                                                    data-form="delete-form-desktop-{{ $schedule->id }}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                                <form id="delete-form-desktop-{{ $schedule->id }}"
+                                                    action="{{ route('teacher.schedules.destroy', $schedule) }}"
+                                                    method="POST" style="display: none;">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
                                                 </form>
                                             </td>
                                         </tr>
@@ -214,6 +292,125 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Modals -->
+    @foreach($schedules as $schedule)
+        <div class="modal fade" id="editModal{{ $schedule->id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="{{ route('teacher.schedules.update', $schedule) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Edit Jadwal</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Hari</label>
+                                    <select class="form-select" name="day" required>
+                                        @php
+                                            $days = ['Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+                                        @endphp
+                                        @foreach($days as $value => $label)
+                                            <option value="{{ $value }}" {{ $schedule->day == $value ? 'selected' : '' }}>
+                                                {{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Kelas</label>
+                                    <select class="form-select" name="class_id" required>
+                                        @foreach($classes as $class)
+                                            <option value="{{ $class->id }}" {{ $schedule->class_id == $class->id ? 'selected' : '' }}>
+                                                {{ $class->class_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mata Pelajaran</label>
+                                <select class="form-select" name="subject" required>
+                                    @foreach($user->subjects as $subj)
+                                        <option value="{{ $subj->name }}" {{ $schedule->subject == $subj->name ? 'selected' : '' }}>
+                                            {{ $subj->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Jam Mulai</label>
+                                    <input type="time" class="form-control" name="start_time"
+                                        value="{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}" required>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Jumlah JP</label>
+                                    <select class="form-select" name="lesson_hours" required>
+                                        @for($i = 1; $i <= 8; $i++)
+                                            <option value="{{ $i }}" {{ $schedule->lesson_hours == $i ? 'selected' : '' }}>
+                                                {{ $i }} JP
+                                            </option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
+    <script>
+        // Dark Mode Toggle
+        function updateAllDarkModeIcons() {
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            const iconClass = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+            const desktopIcon = document.getElementById('darkModeIcon');
+            const mobileIcon = document.getElementById('darkModeIconMobile');
+            if (desktopIcon) desktopIcon.className = iconClass;
+            if (mobileIcon) mobileIcon.className = iconClass;
+        }
+
+        function toggleDarkMode() {
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            localStorage.setItem('darkMode', !isDark);
+            document.documentElement.setAttribute('data-theme', !isDark ? 'dark' : 'light');
+            updateAllDarkModeIcons();
+        }
+
+        document.getElementById('darkModeToggle')?.addEventListener('click', toggleDarkMode);
+        document.getElementById('darkModeToggleMobile')?.addEventListener('click', toggleDarkMode);
+        updateAllDarkModeIcons();
+
+        // SweetAlert Delete Confirmation
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function() {
+                const formId = this.getAttribute('data-form');
+                Swal.fire({
+                    title: 'Hapus Jadwal?',
+                    text: 'Jadwal ini akan dihapus permanen!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(formId).submit();
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

@@ -6,13 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Tewak</title>
     @vite(['resources/css/app.scss', 'resources/js/app.js'])
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
 </head>
 
 <body>
+    @include('partials.loader')
     <div class="container d-flex align-items-center justify-content-center min-vh-100">
         <div class="card p-4" style="max-width: 400px; width: 100%;">
             <div class="card-body">
-                <div class="text-center mb-4">
+                <div class="text-center mb-4 position-relative">
+                    <button type="button" class="btn btn-link position-absolute top-0 end-0 p-0" id="darkModeToggle"
+                        title="Toggle Dark Mode">
+                        <i class="bi bi-moon-fill" id="darkModeIcon"></i>
+                    </button>
                     <h3 class="fw-bold text-primary">Tewak</h3>
                     <p class="text-muted">Monitoring Guru & Absensi</p>
                 </div>
@@ -46,13 +56,39 @@
                         @enderror
                     </div>
 
-                    <div class="d-grid">
+                    <div class="d-grid mb-3">
                         <button type="submit" class="btn btn-primary py-2 fw-bold">Sign In</button>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{{ route('monitor.index') }}" class="text-muted small">
+                            <i class="bi bi-display me-1"></i> Lihat Monitoring
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+
+        function updateDarkModeIcon() {
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            darkModeIcon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+        }
+
+        darkModeToggle.addEventListener('click', function () {
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            localStorage.setItem('darkMode', !isDark);
+            document.documentElement.setAttribute('data-theme', !isDark ? 'dark' : 'light');
+            updateDarkModeIcon();
+        });
+
+        updateDarkModeIcon();
+    </script>
 </body>
 
 </html>

@@ -15,7 +15,7 @@
 
 <body>
     @include('partials.loader')
-    <div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100">
         <div class="card p-4" style="max-width: 400px; width: 100%;">
             <div class="card-body">
                 <div class="text-center mb-4 position-relative">
@@ -68,13 +68,12 @@
                 </form>
             </div>
         </div>
+        <footer class="text-center py-3 mt-auto">
+            <small class="text-muted">
+                Copyright &copy; {{ date('Y') }} Developed by <strong>c0mbra1n</strong> in Banten 🇮🇩
+            </small>
+        </footer>
     </div>
-
-    <footer class="text-center py-3 fixed-bottom">
-        <small class="text-muted">
-            Copyright &copy; {{ date('Y') }} Developed by <strong>c0mbra1n</strong> in Banten 🇮🇩
-        </small>
-    </footer>
 
     <script>
         // Dark Mode Toggle

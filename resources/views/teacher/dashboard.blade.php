@@ -125,163 +125,167 @@
         </div>
     </nav>
 
-    <div class="container py-3 py-lg-4">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        <div class="row">
-            <!-- QR Scanner -->
-            <div class="col-12 col-lg-6 mb-3 mb-lg-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white py-2 py-lg-3">
-                        <h5 class="mb-0 fs-6 fs-lg-5"><i class="bi bi-qr-code-scan me-2"></i>Scan QR Code Kelas</h5>
-                    </div>
-                    <div class="card-body text-center p-3 p-lg-4">
-                        <div id="qr-reader" class="mb-3"></div>
-
-                        <div id="scan-controls">
-                            <button id="btn-start-scan" class="btn btn-primary px-4 py-2 rounded-pill">
-                                <i class="bi bi-camera-fill me-2"></i> Mulai Scan
-                            </button>
-                        </div>
-
-                        <div id="scan-result" class="mt-3 d-none">
-                            <div class="alert py-2" role="alert">
-                                <span id="scan-message"></span>
-                            </div>
-                        </div>
-                    </div>
+    <div class="d-flex flex-column min-vh-100">
+        <div class="container py-3 py-lg-4 flex-grow-1">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            </div>
+            @endif
 
-            <!-- Today's Schedule -->
-            <div class="col-12 col-lg-6 mb-3 mb-lg-4">
-                <div class="card shadow-sm">
-                    <div
-                        class="card-header bg-info text-white d-flex justify-content-between align-items-center py-2 py-lg-3">
-                        <h5 class="mb-0 fs-6 fs-lg-5"><i class="bi bi-calendar-event me-2"></i>Jadwal Hari Ini</h5>
-                        <span
-                            class="badge bg-white text-info small">{{ now()->locale('id')->translatedFormat('l') }}</span>
-                    </div>
-                    <div class="card-body p-0">
-                        @if($schedules->count() > 0)
-                            <ul class="list-group list-group-flush">
-                                @foreach($schedules as $schedule)
-                                    @php
-                                        $attended = $attendances->where('class_id', $schedule->class_id)->where('subject', $schedule->subject)->first();
-                                    @endphp
-                                    <li class="list-group-item px-3 py-2 py-lg-3">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <strong class="small">{{ $schedule->subject }}</strong><br>
-                                                <small class="text-muted">
-                                                    <i class="bi bi-building me-1"></i>{{ $schedule->classRoom->class_name }}
-                                                    <span class="ms-2">
-                                                        <i
-                                                            class="bi bi-clock me-1"></i>{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}
-                                                        - {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
-                                                    </span>
-                                                </small>
-                                            </div>
-                                            @if($attended)
-                                                <span
-                                                    class="badge bg-{{ $attended->status == 'hadir' ? 'success' : ($attended->status == 'telat' ? 'warning' : 'danger') }} rounded-pill small">
-                                                    {{ ucfirst($attended->status) }}
-                                                </span>
-                                            @else
-                                                <span class="badge bg-secondary rounded-pill small">Belum</span>
-                                            @endif
-                                        </div>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @else
-                            <div class="text-center py-4 text-muted">
-                                <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
-                                <p class="small mb-2">Tidak ada jadwal hari ini</p>
-                                <a href="{{ route('teacher.schedules') }}" class="btn btn-sm btn-outline-primary">Tambah
-                                    Jadwal</a>
+            <div class="row">
+                <!-- QR Scanner -->
+                <div class="col-12 col-lg-6 mb-3 mb-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white py-2 py-lg-3">
+                            <h5 class="mb-0 fs-6 fs-lg-5"><i class="bi bi-qr-code-scan me-2"></i>Scan QR Code Kelas</h5>
+                        </div>
+                        <div class="card-body text-center p-3 p-lg-4">
+                            <div id="qr-reader" class="mb-3"></div>
+
+                            <div id="scan-controls">
+                                <button id="btn-start-scan" class="btn btn-primary px-4 py-2 rounded-pill">
+                                    <i class="bi bi-camera-fill me-2"></i> Mulai Scan
+                                </button>
                             </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Today's Attendance History -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-white py-2 py-lg-3">
-                <h5 class="mb-0 fw-bold fs-6 fs-lg-5"><i class="bi bi-clock-history me-2"></i>Riwayat Absensi Hari Ini
-                </h5>
-            </div>
-            <div class="card-body p-0">
-                <!-- Mobile View -->
-                <div class="d-lg-none">
-                    @forelse($attendances as $att)
-                        <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-bold small">{{ $att->classRoom->class_name ?? '-' }}</div>
-                                <div class="text-muted" style="font-size: 0.75rem;">
-                                    {{ $att->subject }} • {{ \Carbon\Carbon::parse($att->scan_time)->format('H:i') }}
+                            <div id="scan-result" class="mt-3 d-none">
+                                <div class="alert py-2" role="alert">
+                                    <span id="scan-message"></span>
                                 </div>
                             </div>
-                            <span
-                                class="badge bg-{{ $att->status == 'hadir' ? 'success' : ($att->status == 'telat' ? 'warning' : 'danger') }}">
-                                {{ ucfirst($att->status) }}
-                            </span>
                         </div>
-                    @empty
-                        <div class="text-center py-4 text-muted small">Belum ada absensi hari ini</div>
-                    @endforelse
+                    </div>
                 </div>
 
-                <!-- Desktop View -->
-                <div class="table-responsive d-none d-lg-block">
-                    <table class="table table-hover mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th>Waktu</th>
-                                <th>Kelas</th>
-                                <th>Mata Pelajaran</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($attendances as $att)
+                <!-- Today's Schedule -->
+                <div class="col-12 col-lg-6 mb-3 mb-lg-4">
+                    <div class="card shadow-sm">
+                        <div
+                            class="card-header bg-info text-white d-flex justify-content-between align-items-center py-2 py-lg-3">
+                            <h5 class="mb-0 fs-6 fs-lg-5"><i class="bi bi-calendar-event me-2"></i>Jadwal Hari Ini</h5>
+                            <span
+                                class="badge bg-white text-info small">{{ now()->locale('id')->translatedFormat('l') }}</span>
+                        </div>
+                        <div class="card-body p-0">
+                            @if($schedules->count() > 0)
+                                <ul class="list-group list-group-flush">
+                                    @foreach($schedules as $schedule)
+                                        @php
+                                            $attended = $attendances->where('class_id', $schedule->class_id)->where('subject', $schedule->subject)->first();
+                                        @endphp
+                                        <li class="list-group-item px-3 py-2 py-lg-3">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <strong class="small">{{ $schedule->subject }}</strong><br>
+                                                    <small class="text-muted">
+                                                        <i
+                                                            class="bi bi-building me-1"></i>{{ $schedule->classRoom->class_name }}
+                                                        <span class="ms-2">
+                                                            <i
+                                                                class="bi bi-clock me-1"></i>{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}
+                                                            - {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
+                                                        </span>
+                                                    </small>
+                                                </div>
+                                                @if($attended)
+                                                    <span
+                                                        class="badge bg-{{ $attended->status == 'hadir' ? 'success' : ($attended->status == 'telat' ? 'warning' : 'danger') }} rounded-pill small">
+                                                        {{ ucfirst($attended->status) }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-secondary rounded-pill small">Belum</span>
+                                                @endif
+                                            </div>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <div class="text-center py-4 text-muted">
+                                    <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+                                    <p class="small mb-2">Tidak ada jadwal hari ini</p>
+                                    <a href="{{ route('teacher.schedules') }}" class="btn btn-sm btn-outline-primary">Tambah
+                                        Jadwal</a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Attendance History -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-2 py-lg-3">
+                    <h5 class="mb-0 fw-bold fs-6 fs-lg-5"><i class="bi bi-clock-history me-2"></i>Riwayat Absensi Hari
+                        Ini
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Mobile View -->
+                    <div class="d-lg-none">
+                        @forelse($attendances as $att)
+                            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold small">{{ $att->classRoom->class_name ?? '-' }}</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        {{ $att->subject }} • {{ \Carbon\Carbon::parse($att->scan_time)->format('H:i') }}
+                                    </div>
+                                </div>
+                                <span
+                                    class="badge bg-{{ $att->status == 'hadir' ? 'success' : ($att->status == 'telat' ? 'warning' : 'danger') }}">
+                                    {{ ucfirst($att->status) }}
+                                </span>
+                            </div>
+                        @empty
+                            <div class="text-center py-4 text-muted small">Belum ada absensi hari ini</div>
+                        @endforelse
+                    </div>
+
+                    <!-- Desktop View -->
+                    <div class="table-responsive d-none d-lg-block">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($att->scan_time)->format('H:i:s') }}</td>
-                                    <td>{{ $att->classRoom->class_name ?? '-' }}</td>
-                                    <td>{{ $att->subject }}</td>
-                                    <td>
-                                        <span
-                                            class="badge bg-{{ $att->status == 'hadir' ? 'success' : ($att->status == 'telat' ? 'warning' : 'danger') }}">
-                                            {{ ucfirst($att->status) }}
-                                        </span>
-                                    </td>
+                                    <th>Waktu</th>
+                                    <th>Kelas</th>
+                                    <th>Mata Pelajaran</th>
+                                    <th>Status</th>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">Belum ada absensi hari ini</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @forelse($attendances as $att)
+                                    <tr>
+                                        <td>{{ \Carbon\Carbon::parse($att->scan_time)->format('H:i:s') }}</td>
+                                        <td>{{ $att->classRoom->class_name ?? '-' }}</td>
+                                        <td>{{ $att->subject }}</td>
+                                        <td>
+                                            <span
+                                                class="badge bg-{{ $att->status == 'hadir' ? 'success' : ($att->status == 'telat' ? 'warning' : 'danger') }}">
+                                                {{ ucfirst($att->status) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">Belum ada absensi hari ini</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <footer class="bg-white text-center py-3 border-top mt-4">
-        <div class="container">
-            <small class="text-muted">
-                Copyright &copy; {{ date('Y') }} Developed by <strong>c0mbra1n</strong> in Banten 🇮🇩
-            </small>
-        </div>
-    </footer>
+        <footer class="bg-white text-center py-3 border-top mt-auto">
+            <div class="container">
+                <small class="text-muted">
+                    Copyright &copy; {{ date('Y') }} Developed by <strong>c0mbra1n</strong> in Banten 🇮🇩
+                </small>
+            </div>
+        </footer>
+    </div>
 
     <!-- Photo Upload Modal -->
     <div class="modal fade" id="photoModal" tabindex="-1">

@@ -158,136 +158,138 @@
 
 <body>
     @include('partials.loader')
-    <div class="container py-4">
-        <div class="monitoring-header text-center position-relative">
-            <h1 class="fw-bold mb-2">Monitoring Keberadaan Guru</h1>
-            <p class="mb-0">
-                <span id="current-time">Loading time...</span>
-                <span class="badge bg-success ms-2" id="realtime-badge">
-                    <i class="bi bi-broadcast"></i> LIVE
-                </span>
-            </p>
-            <div class="position-absolute top-50 end-0 translate-middle-y me-4 d-none d-md-flex gap-2">
-                <button type="button" class="btn btn-light" id="darkModeToggle" title="Toggle Dark Mode">
-                    <i class="bi bi-moon-fill" id="darkModeIcon"></i>
-                </button>
-                <a href="{{ route('login') }}" class="btn btn-light fw-bold text-primary">Login</a>
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <div class="d-flex gap-2 flex-wrap">
-                <span class="badge status-hadir">Hadir</span>
-                <span class="badge status-telat">Telat</span>
-                <span class="badge status-belum_hadir">Belum Hadir</span>
-                <span class="badge status-tidak_hadir">Tidak Hadir</span>
-                <span class="badge status-izin">Izin</span>
-                <span class="badge status-sakit">Sakit</span>
-                <span class="badge status-dinas">Dinas</span>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <!-- View Mode Selector -->
-                <div class="btn-group me-2" role="group">
-                    <button type="button" class="btn btn-outline-primary active" id="btn-mode-all">Semua</button>
-                    <button type="button" class="btn btn-outline-primary" id="btn-mode-block">Per Blok</button>
-                </div>
-
-                <!-- Block Selector (Hidden by default) -->
-                <select class="form-select d-none" id="block-selector" style="width: auto;">
-                    <option value="" disabled selected>Pilih Blok</option>
-                    @for($i = 1; $i <= 10; $i++)
-                        <option value="{{ $i }}">Blok {{ $i }}</option>
-                    @endfor
-                </select>
-
-                <div class="view-toggle btn-group" role="group" id="view-toggle-group">
-                    <button type="button" class="btn btn-outline-secondary active" id="btn-list-view" title="List View">
-                        <i class="bi bi-list-ul"></i>
+    <div class="d-flex flex-column min-vh-100">
+        <div class="container py-4 flex-grow-1">
+            <div class="monitoring-header text-center position-relative">
+                <h1 class="fw-bold mb-2">Monitoring Keberadaan Guru</h1>
+                <p class="mb-0">
+                    <span id="current-time">Loading time...</span>
+                    <span class="badge bg-success ms-2" id="realtime-badge">
+                        <i class="bi bi-broadcast"></i> LIVE
+                    </span>
+                </p>
+                <div class="position-absolute top-50 end-0 translate-middle-y me-4 d-none d-md-flex gap-2">
+                    <button type="button" class="btn btn-light" id="darkModeToggle" title="Toggle Dark Mode">
+                        <i class="bi bi-moon-fill" id="darkModeIcon"></i>
                     </button>
-                    <button type="button" class="btn btn-outline-secondary" id="btn-grid-view" title="Grid View">
-                        <i class="bi bi-grid-3x3-gap"></i>
+                    <a href="{{ route('login') }}" class="btn btn-light fw-bold text-primary">Login</a>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div class="d-flex gap-2 flex-wrap">
+                    <span class="badge status-hadir">Hadir</span>
+                    <span class="badge status-telat">Telat</span>
+                    <span class="badge status-belum_hadir">Belum Hadir</span>
+                    <span class="badge status-tidak_hadir">Tidak Hadir</span>
+                    <span class="badge status-izin">Izin</span>
+                    <span class="badge status-sakit">Sakit</span>
+                    <span class="badge status-dinas">Dinas</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- View Mode Selector -->
+                    <div class="btn-group me-2" role="group">
+                        <button type="button" class="btn btn-outline-primary active" id="btn-mode-all">Semua</button>
+                        <button type="button" class="btn btn-outline-primary" id="btn-mode-block">Per Blok</button>
+                    </div>
+
+                    <!-- Block Selector (Hidden by default) -->
+                    <select class="form-select d-none" id="block-selector" style="width: auto;">
+                        <option value="" disabled selected>Pilih Blok</option>
+                        @for($i = 1; $i <= 10; $i++)
+                            <option value="{{ $i }}">Blok {{ $i }}</option>
+                        @endfor
+                    </select>
+
+                    <div class="view-toggle btn-group" role="group" id="view-toggle-group">
+                        <button type="button" class="btn btn-outline-secondary active" id="btn-list-view"
+                            title="List View">
+                            <i class="bi bi-list-ul"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="btn-grid-view" title="Grid View">
+                            <i class="bi bi-grid-3x3-gap"></i>
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary d-md-none" id="darkModeToggleMobile"
+                        title="Toggle Dark Mode">
+                        <i class="bi bi-moon-fill" id="darkModeIconMobile"></i>
                     </button>
-                </div>
-                <button type="button" class="btn btn-outline-secondary d-md-none" id="darkModeToggleMobile"
-                    title="Toggle Dark Mode">
-                    <i class="bi bi-moon-fill" id="darkModeIconMobile"></i>
-                </button>
-                <a href="{{ route('login') }}" class="btn btn-primary btn-sm d-md-none">Login</a>
-            </div>
-        </div>
-
-        <div id="monitoring-container">
-            <!-- List View (Default) -->
-            <div id="list-view" class="card shadow-sm">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0 align-middle">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-4">Guru</th>
-                                <th>Status</th>
-                                <th>Lokasi</th>
-                                <th>Mapel</th>
-                                <th>Waktu Scan</th>
-                                <th>Jadwal Aktif</th>
-                            </tr>
-                        </thead>
-                        <tbody id="list-view-body">
-                            <tr>
-                                <td colspan="6" class="text-center py-4">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-sm d-md-none">Login</a>
                 </div>
             </div>
 
-            <!-- Grid View (Hidden by default) -->
-            <div id="grid-view" class="row g-4 d-none">
-                <div class="col-12 text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+            <div id="monitoring-container">
+                <!-- List View (Default) -->
+                <div id="list-view" class="card shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Guru</th>
+                                    <th>Status</th>
+                                    <th>Lokasi</th>
+                                    <th>Mapel</th>
+                                    <th>Waktu Scan</th>
+                                    <th>Jadwal Aktif</th>
+                                </tr>
+                            </thead>
+                            <tbody id="list-view-body">
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Grid View (Hidden by default) -->
+                <div id="grid-view" class="row g-4 d-none">
+                    <div class="col-12 text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Block View (Hidden by default) -->
+                <div id="block-view" class="card shadow-sm d-none">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold" id="block-title">Monitoring Blok</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Kelas</th>
+                                    <th>Jadwal Pelajaran</th>
+                                    <th>Guru Pengajar</th>
+                                    <th>Status Kehadiran Guru</th>
+                                </tr>
+                            </thead>
+                            <tbody id="block-view-body">
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-            <!-- Block View (Hidden by default) -->
-            <div id="block-view" class="card shadow-sm d-none">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold" id="block-title">Monitoring Blok</h5>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0 align-middle">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-4">Kelas</th>
-                                <th>Jadwal Pelajaran</th>
-                                <th>Guru Pengajar</th>
-                                <th>Status Kehadiran Guru</th>
-                            </tr>
-                        </thead>
-                        <tbody id="block-view-body">
-                            <tr>
-                                <td colspan="4" class="text-center py-4">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
-    </div>
 
-    <footer class="text-center py-4 mt-4 border-top">
-        <small class="text-muted">
-            Copyright &copy; {{ date('Y') }} Developed by <strong>c0mbra1n</strong> in Banten 🇮🇩
-        </small>
-    </footer>
+        <footer class="text-center py-4 mt-auto border-top">
+            <small class="text-muted">
+                Copyright &copy; {{ date('Y') }} Developed by <strong>c0mbra1n</strong> in Banten 🇮🇩
+            </small>
+        </footer>
     </div>
 
     <script type="module">

@@ -85,6 +85,8 @@ class BackgroundService {
         
         if (scheduleData['status'] == 'active_schedule') {
           final data = scheduleData['data'];
+          int? scheduleId = data['schedule_id'];
+          String className = data['class_name'];
           double classLat = double.parse(data['class_lat'].toString());
           double classLng = double.parse(data['class_lng'].toString());
           double radius = double.parse(data['radius'].toString());
@@ -93,9 +95,22 @@ class BackgroundService {
               position.latitude, position.longitude, classLat, classLng);
 
           if (distance > radius) {
-             _showNotification(flutterLocalNotificationsPlugin, 
-                 "Peringatan!", 
-                 "Anda berada ${distance.toStringAsFixed(0)}m dari kelas. Harap kembali mengajar!");
+            // Show local notification to teacher
+            _showNotification(flutterLocalNotificationsPlugin, 
+                "Peringatan!", 
+                "Anda berada ${distance.toStringAsFixed(0)}m dari kelas. Harap kembali mengajar!");
+            
+            // Report violation to server (for admin notification)
+            await apiService.reportGeofenceViolation(
+              scheduleId: scheduleId,
+              className: className,
+              teacherLat: position.latitude,
+              teacherLng: position.longitude,
+              classLat: classLat,
+              classLng: classLng,
+              distance: distance,
+              radius: radius,
+            );
           }
         }
       } catch (e) {

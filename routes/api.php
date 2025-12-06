@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/location/update', [MonitoringController::class, 'updateLocation']);
     Route::get('/attendance/history', [MonitoringController::class, 'getAttendanceHistory']);
     Route::post('/scan', [App\Http\Controllers\AttendanceController::class, 'store']);
+    Route::post('/geofence/violation', [MonitoringController::class, 'reportGeofenceViolation']);
 
     // Existing public monitoring endpoint (if needed to be protected or separate)
     // Route::get('/monitoring', ...); 

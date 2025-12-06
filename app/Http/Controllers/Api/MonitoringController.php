@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Schedule;
 use App\Models\LocationLog;
+use App\Models\GeofenceViolation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -85,6 +86,7 @@ class MonitoringController extends Controller
             'data' => $log
         ]);
     }
+
     public function getAttendanceHistory(Request $request)
     {
         $user = $request->user();
@@ -110,4 +112,55 @@ class MonitoringController extends Controller
             'data' => $attendances
         ]);
     }
+
+    /**
+     * Report geofence violation (teacher left class area)
+     */
+    public function reportGeofenceViolation(Request $request)
+    {
+        $request->validate([
+            'schedule_id' => 'nullable|integer',
+            'class_name' => 'required|string',
+            'teacher_lat' => 'required|numeric',
+            'teacher_lng' => 'required|numeric',
+            'class_lat' => 'required|numeric',
+            'class_lng' => 'required|numeric',
+            'distance' => 'required|numeric',
+            'radius' => 'required|numeric',
+        ]);
+
+        $user = $request->user();
+
+        // Check if similar violation was reported in last 5 minutes (avoid spam)
+        $recentViolation = GeofenceViolation::where('user_id', $user->id)
+            ->where('created_at', '>=', Carbon::now()->subMinutes(5))
+            ->first();
+
+        if ($recentViolation) {
+            return response()->json([
+                'status' => 'skipped',
+                'message' => 'Violation already reported recently'
+            ]);
+        }
+
+        $violation = GeofenceViolation::create([
+            'user_id' => $user->id,
+            'schedule_id' => $request->schedule_id,
+            'class_name' => $request->class_name,
+            'teacher_lat' => $request->teacher_lat,
+            'teacher_lng' => $request->teacher_lng,
+            'class_lat' => $request->class_lat,
+            'class_lng' => $request->class_lng,
+            'distance' => $request->distance,
+            'radius' => $request->radius,
+            'is_read' => false,
+        ]);
+
+        return response()->json([
+            'status' => 'reported',
+            'message' => 'Geofence violation reported successfully',
+            'data' => $violation
+        ]);
+    }
 }
+

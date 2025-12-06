@@ -123,4 +123,37 @@ class ApiService {
       throw Exception('Failed to get user profile');
     }
   }
+
+  Future<void> reportGeofenceViolation({
+    int? scheduleId,
+    required String className,
+    required double teacherLat,
+    required double teacherLng,
+    required double classLat,
+    required double classLng,
+    required double distance,
+    required double radius,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString(Constants.tokenKey);
+
+    await http.post(
+      Uri.parse('${Constants.baseUrl}/geofence/violation'),
+      body: {
+        'schedule_id': scheduleId?.toString() ?? '',
+        'class_name': className,
+        'teacher_lat': teacherLat.toString(),
+        'teacher_lng': teacherLng.toString(),
+        'class_lat': classLat.toString(),
+        'class_lng': classLng.toString(),
+        'distance': distance.toString(),
+        'radius': radius.toString(),
+      },
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+  }
 }
+

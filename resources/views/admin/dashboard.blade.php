@@ -80,6 +80,63 @@
         </div>
     </div>
 
+    <!-- Geofence Violations Alert -->
+    @if($unreadViolationsCount > 0)
+        <div class="card border-danger mb-4 shadow-sm">
+            <div class="card-header bg-danger text-white py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span class="fw-bold">Peringatan Geofence</span>
+                    <span class="badge bg-white text-danger ms-2">{{ $unreadViolationsCount }} baru</span>
+                </div>
+                <form action="{{ route('admin.geofence.mark-read') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-check-all"></i> Tandai Sudah Dibaca
+                    </button>
+                </form>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Guru</th>
+                                <th>Kelas</th>
+                                <th>Jarak</th>
+                                <th>Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($geofenceViolations as $violation)
+                                <tr class="table-danger">
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-exclamation text-danger me-2 fs-5"></i>
+                                            <strong>{{ $violation->user->full_name ?? 'Unknown' }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>{{ $violation->class_name }}</td>
+                                    <td>
+                                        <span class="badge bg-danger">
+                                            {{ number_format($violation->distance, 0) }}m
+                                            <small>(maks {{ number_format($violation->radius, 0) }}m)</small>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">
+                                            {{ $violation->created_at->diffForHumans() }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Recent Activity Table -->
     <div class="card shadow-sm">
         <div class="card-header bg-white py-3">

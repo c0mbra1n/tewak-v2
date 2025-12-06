@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
@@ -25,15 +26,22 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _checkServiceStatus();
+    // Skip background service check in debug mode (emulator)
+    if (!kDebugMode) {
+      _checkServiceStatus();
+    }
     _loadData();
   }
 
   Future<void> _checkServiceStatus() async {
-    final service = FlutterBackgroundService();
-    var isRunning = await service.isRunning();
-    if (!isRunning) {
-      service.startService();
+    try {
+      final service = FlutterBackgroundService();
+      var isRunning = await service.isRunning();
+      if (!isRunning) {
+        await service.startService();
+      }
+    } catch (e) {
+      print("Background service error: $e");
     }
   }
 

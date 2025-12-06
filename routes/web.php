@@ -70,6 +70,9 @@ Route::middleware(['auth'])->group(function () {
 
         // Reset Password
         Route::put('/users/{user}/reset-password', [AdminController::class, 'resetPassword'])->name('users.reset-password');
+
+        // Geofence Violations
+        Route::post('/geofence/mark-read', [AdminController::class, 'markGeofenceRead'])->name('geofence.mark-read');
     });
 
     // Teacher Routes

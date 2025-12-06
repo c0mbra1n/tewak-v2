@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_screen.dart';
@@ -8,14 +9,29 @@ import 'utils/constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await BackgroundService.initializeService();
+  
+  // Only initialize background service in release mode or physical device
+  // Skip on debug mode to prevent emulator crashes
+  if (!kDebugMode) {
+    try {
+      await BackgroundService.initializeService();
+    } catch (e) {
+      print("Background service init failed: $e");
+    }
+  } else {
+    print("DEBUG MODE: Skipping background service initialization");
+  }
   
   // Request permissions
-  await [
-    Permission.location,
-    Permission.locationAlways,
-    Permission.notification,
-  ].request();
+  try {
+    await [
+      Permission.location,
+      Permission.locationAlways,
+      Permission.notification,
+    ].request();
+  } catch (e) {
+    print("Permission request failed: $e");
+  }
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString(Constants.tokenKey);

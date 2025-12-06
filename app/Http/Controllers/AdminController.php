@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\ClassRoom;
+use App\Models\GeofenceViolation;
 use App\Models\Schedule;
 use App\Models\Subject;
 use App\Models\User;
@@ -29,7 +30,24 @@ class AdminController extends Controller
             ->take(5)
             ->get();
 
-        return view('admin.dashboard', compact('totalTeachers', 'totalClasses', 'attendanceToday', 'lateToday', 'recentActivities'));
+        // Geofence Violations (unread)
+        $geofenceViolations = GeofenceViolation::with('user')
+            ->where('is_read', false)
+            ->latest()
+            ->take(10)
+            ->get();
+
+        $unreadViolationsCount = GeofenceViolation::where('is_read', false)->count();
+
+        return view('admin.dashboard', compact(
+            'totalTeachers',
+            'totalClasses',
+            'attendanceToday',
+            'lateToday',
+            'recentActivities',
+            'geofenceViolations',
+            'unreadViolationsCount'
+        ));
     }
 
     // ================================
@@ -587,4 +605,15 @@ class AdminController extends Controller
 
         return back()->with('success', 'Password user berhasil direset!');
     }
+
+    // ================================
+    // GEOFENCE VIOLATIONS
+    // ================================
+
+    public function markGeofenceRead()
+    {
+        GeofenceViolation::where('is_read', false)->update(['is_read' => true]);
+        return back()->with('success', 'Semua peringatan geofence telah ditandai sudah dibaca.');
+    }
 }
+

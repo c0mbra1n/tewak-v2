@@ -615,5 +615,34 @@ class AdminController extends Controller
         GeofenceViolation::where('is_read', false)->update(['is_read' => true]);
         return back()->with('success', 'Semua peringatan geofence telah ditandai sudah dibaca.');
     }
+
+    /**
+     * API endpoint for real-time geofence violations (AJAX polling)
+     */
+    public function getGeofenceViolations()
+    {
+        $violations = GeofenceViolation::with('user')
+            ->where('is_read', false)
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(function ($v) {
+                return [
+                    'id' => $v->id,
+                    'teacher_name' => $v->user->full_name ?? 'Unknown',
+                    'class_name' => $v->class_name,
+                    'distance' => number_format((float) $v->distance, 0),
+                    'radius' => number_format((float) $v->radius, 0),
+                    'time_ago' => $v->created_at->diffForHumans(),
+                    'created_at' => $v->created_at->toIso8601String(),
+                ];
+            });
+
+        return response()->json([
+            'count' => GeofenceViolation::where('is_read', false)->count(),
+            'violations' => $violations,
+        ]);
+    }
 }
+
 

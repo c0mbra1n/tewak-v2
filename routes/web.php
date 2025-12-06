@@ -73,6 +73,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Geofence Violations
         Route::post('/geofence/mark-read', [AdminController::class, 'markGeofenceRead'])->name('geofence.mark-read');
+        Route::get('/geofence/violations', [AdminController::class, 'getGeofenceViolations'])->name('geofence.violations');
     });
 
     // Teacher Routes

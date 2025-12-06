@@ -160,6 +160,40 @@
                 </div>
 
                 <div class="ms-auto d-flex align-items-center">
+                    <!-- Notification Bell -->
+                    <div class="dropdown me-2">
+                        <button class="btn btn-link position-relative p-2" type="button" id="notificationDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false" title="Notifikasi">
+                            <i class="bi bi-bell-fill fs-5"></i>
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"
+                                id="notificationBadge">
+                                0
+                            </span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow"
+                            style="width: 350px; max-height: 400px; overflow-y: auto;"
+                            aria-labelledby="notificationDropdown">
+                            <h6 class="dropdown-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-bell me-1"></i> Peringatan Geofence</span>
+                                <span class="badge bg-danger" id="notificationCount">0</span>
+                            </h6>
+                            <div id="notificationList">
+                                <div class="dropdown-item text-center text-muted py-3">
+                                    <i class="bi bi-check-circle"></i> Tidak ada peringatan
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <form action="{{ route('admin.geofence.mark-read') }}" method="POST" class="px-3 py-2">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-outline-secondary w-100" id="markAllReadBtn"
+                                    disabled>
+                                    <i class="bi bi-check-all"></i> Tandai Sudah Dibaca
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
                     <button type="button" class="dark-mode-toggle btn btn-link p-2 me-1 me-lg-2" id="darkModeToggle"
                         title="Toggle Dark Mode">
                         <i class="bi bi-moon-fill" id="darkModeIcon"></i>
@@ -279,6 +313,78 @@
         toggleBtn.addEventListener('click', openSidebar);
         closeBtn.addEventListener('click', closeSidebar);
         overlay.addEventListener('click', closeSidebar);
+
+        // ================================
+        // Real-time Geofence Notifications
+        // ================================
+        let lastNotificationCount = 0;
+        const notificationSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2JlZSJfHN3hZOdnpOIf4GNnqepo5mQjpOepqqkmI+MkZqjoZmPi4+YoaSglo2JjpaeoJqQiomRmqGhnZOLiY+XnZ2ZkYyMkpmdnJiQjY6SmJqZlI+NkJWZmZaRj5CUl5iWk5CQk5aXlpOQkJOVlpWTkZGTlZWUk5GSlJWVlJKRkpSVlJOSkpOUlJOSkpOUlJOSkpOUlJOSkpOUlJOSkpOUlJOSkpOUlJOSkpOUlJOSkg==');
+
+        function playNotificationSound() {
+            notificationSound.play().catch(e => console.log('Sound blocked by browser'));
+        }
+
+        function fetchNotifications() {
+            fetch('{{ route("admin.geofence.violations") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('notificationBadge');
+                    const countLabel = document.getElementById('notificationCount');
+                    const listContainer = document.getElementById('notificationList');
+                    const markReadBtn = document.getElementById('markAllReadBtn');
+
+                    // Update badge
+                    if (data.count > 0) {
+                        badge.textContent = data.count > 99 ? '99+' : data.count;
+                        badge.classList.remove('d-none');
+                        countLabel.textContent = data.count;
+                        markReadBtn.disabled = false;
+
+                        // Play sound if new notifications
+                        if (data.count > lastNotificationCount) {
+                            playNotificationSound();
+                        }
+                    } else {
+                        badge.classList.add('d-none');
+                        countLabel.textContent = '0';
+                        markReadBtn.disabled = true;
+                    }
+
+                    lastNotificationCount = data.count;
+
+                    // Update notification list
+                    if (data.violations.length > 0) {
+                        listContainer.innerHTML = data.violations.map(v => `
+                            <div class="dropdown-item py-2 border-bottom">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-person-exclamation text-danger me-2 mt-1"></i>
+                                    <div class="flex-grow-1">
+                                        <strong class="d-block">${v.teacher_name}</strong>
+                                        <small class="text-muted">${v.class_name}</small>
+                                        <div class="mt-1">
+                                            <span class="badge bg-danger">Jarak: ${v.distance}m</span>
+                                            <span class="text-muted small ms-2">${v.time_ago}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        listContainer.innerHTML = `
+                            <div class="dropdown-item text-center text-muted py-3">
+                                <i class="bi bi-check-circle"></i> Tidak ada peringatan
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => console.log('Notification fetch error:', error));
+        }
+
+        // Initial fetch
+        fetchNotifications();
+
+        // Poll every 30 seconds
+        setInterval(fetchNotifications, 30000);
     </script>
     @stack('scripts')
 </body>
